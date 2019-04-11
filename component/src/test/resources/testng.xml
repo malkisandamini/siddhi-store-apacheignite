@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Siddhi-Store-ApacheIgnite-Test-Suite" parallel="false">
+    <test name="Siddhi-store-apacheignite-tests" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.extension.siddhi.store.apacheignite.TestCaseOfApacheIgniteEventTable"/>
+        </classes>
+    </test>
+</suite>

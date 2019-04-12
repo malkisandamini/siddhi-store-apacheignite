@@ -49,5 +49,20 @@ public class ApacheIgniteConstants {
     public static final String OPEN_PARENTHESIS = "(";
     public static final String CLOSE_PARENTHESIS = ")";
     public static final String WHITESPACE = " ";
+    public static final String SEPARATOR = ",";
+
+    public static final String BOOLEAN = "boolean ";
+    public static final String STRING = " varchar";
+    public static final String LONG = "long";
+    public static final String FLOAT = "float";
+
+    public static final String INSERT_QUERY = "insert into {{tableName}} ({{columns}}) values ({{values}})";
+    public static final String INSERTS_QUERY =  "insert into {{tableName}} ({{columns}}) values ({{value}})";
+    public static final String CONDITION = "{{condition}}";
+    public static final String COLUMNS = "{{columns}}";
+    public static final String VALUES = "{{values}}";
+    public static final String TABLE_NAME = "{{tableName}}";
+
+    public static final String TABLE_CREATE_QUERY = "CREATE TABLE IF NOT EXISTS  ";
 
 }

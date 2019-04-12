@@ -120,7 +120,7 @@ public class ReadEventsFromApacheIgniteTestCase {
 
         Thread.sleep(500);
         //Assert.assertEquals(eventArrived, true, "Event arrived");
-        Thread.sleep(500);
+        //Thread.sleep(500);
         int pointsInTable = 2;
         // Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
         siddhiAppRuntime.shutdown();

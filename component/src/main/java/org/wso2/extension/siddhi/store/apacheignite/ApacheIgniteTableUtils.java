@@ -17,10 +17,20 @@
  */
 package org.wso2.extension.siddhi.store.apacheignite;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  * contains methods required for implementation
  */
 public class ApacheIgniteTableUtils {
+
+    private static final Log log = LogFactory.getLog(ApacheIgniteTableUtils.class);
 
     private ApacheIgniteTableUtils() {
         //preventing initialization
@@ -29,6 +39,46 @@ public class ApacheIgniteTableUtils {
     public static boolean isEmpty(String field) {
 
         return (field == null || field.trim().length() == 0);
+    }
+
+    public static void cleanupConnection(ResultSet rs, Statement stmt, Connection conn) {
+
+        if (rs != null) {
+            try {
+                rs.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closed ResultSet");
+                }
+            } catch (SQLException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error closing ResultSet: " + e.getMessage(), e);
+                }
+            }
+        }
+        if (stmt != null) {
+            try {
+                stmt.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Closed PreparedStatement");
+                }
+            } catch (SQLException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error closing PreparedStatement: " + e.getMessage(), e);
+                }
+            }
+        }
+//        if (conn != null) {
+//            try {
+//                conn.close();
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Closed Connection");
+//                }
+//            } catch (SQLException e) {
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Error closing Connection: " + e.getMessage(), e);
+//                }
+//            }
+//        }
     }
 
 }

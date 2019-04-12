@@ -8,7 +8,6 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.table.record.AbstractQueryableRecordTable;
-//import org.wso2.siddhi.core.table.record.AbstractRecordTable;
 import org.wso2.siddhi.core.table.record.ExpressionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
@@ -36,6 +35,19 @@ import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_TABLE_NAME;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_URL;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_USERNAME;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.BOOLEAN;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.CLOSE_PARENTHESIS;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.COLUMNS;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.FLOAT;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.INSERT_QUERY;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.LONG;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.OPEN_PARENTHESIS;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SEPARATOR;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SQL_PRIMARY_KEY_DEF;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.STRING;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.TABLE_CREATE_QUERY;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.TABLE_NAME;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.VALUES;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.WHITESPACE;
 import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_INDEX;
 import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_PRIMARY_KEY;
@@ -144,18 +156,29 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     @Override
     protected void add(List<Object[]> records) throws ConnectionUnavailableException {
 
+        PreparedStatement statement = null;
+        PreparedStatement st = null;
+
         try {
-            StringBuilder insertQuery = new StringBuilder();
+            String insertQuery = null;
             for (Object[] record : records) {
-                insertQuery.append("INSERT INTO ").append(tableName)
-                        .append(" (").append(this.columnNames()).append(")").append(" values ")
-                        .append("(").append(this.convertAttributesValuesToString(record)).append(")");
+                insertQuery = INSERT_QUERY;
+                insertQuery = insertQuery.replace(COLUMNS, this.columnNames())
+                        .replace(TABLE_NAME, this.tableName)
+                        .replace(VALUES, this.convertAttributesValue(record));
+
+                statement = con.prepareStatement(insertQuery);
+                st = this.bindValuesToAttributes(statement, record);
             }
+
             log.info(insertQuery);
-            PreparedStatement statement = con.prepareStatement(insertQuery.toString());
-            statement.execute();
-            statement.close();
+            if (st != null) {
+                st.execute();
+                st.close();
+            }
+
         } catch (SQLException e) {
+            ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
             throw new SiddhiAppRuntimeException("insertion failed " + e.getMessage());
         }
     }
@@ -175,6 +198,9 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         String condition = igniteCompiledCondition.getCompiledQuery();
         log.info(condition);
+
+        PreparedStatement st ;
+        ResultSet rs ;
         StringBuilder readQuery = new StringBuilder();
         readQuery.append("SELECT ").append(" * ").append("FROM ").append(this.tableName);
         try {
@@ -192,15 +218,17 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                 readQuery.append(condition);
                 log.info(readQuery);
             }
-            PreparedStatement st = con.prepareStatement(readQuery.toString());
-            ResultSet rs = st.executeQuery();
-            if (rs.toString().isEmpty()) {
-                log.info("No matching records to be retrieved for condition ");
-            }
-//            rs.close();
-//            st.close();
+            st = con.prepareStatement(readQuery.toString());
+            rs = st.executeQuery();
+//            if (rs.toString().isEmpty()) {
+//                //ApacheIgniteTableUtils.cleanupConnection(rs, st, con);
+//                log.info("No matching records to be retrieved for condition ");
+//            } else{
+//
+//            }
             return new ApacheIgniteIterator(con, st, rs, tableName, attributes);
         } catch (SQLException e) {
+            // ApacheIgniteTableUtils.cleanupConnection(rs, st, con); bug
             throw new ApacheIgniteTableException("unable to read " + this.tableName + e.getMessage());
         }
     }
@@ -219,6 +247,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         String condition = igniteCompiledCondition.getCompiledQuery();
+        ResultSet rs = null;
+        PreparedStatement st = null;
         log.info(condition);
         StringBuilder readQuery = new StringBuilder();
         readQuery.append("SELECT ").append(" * ").append("FROM ").append(this.tableName);
@@ -237,15 +267,19 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                 readQuery.append(condition);
                 log.info(readQuery);
             }
-            PreparedStatement st = con.prepareStatement(readQuery.toString());
-            ResultSet rs = st.executeQuery();
+            st = con.prepareStatement(readQuery.toString());
+            rs = st.executeQuery();
             if (rs.next()) {
+                ApacheIgniteTableUtils.cleanupConnection(rs, st, con);
                 return true;
             } else {
+                ApacheIgniteTableUtils.cleanupConnection(rs, st, con);
                 log.info("No results matching for given condition ");
                 return false;
             }
+
         } catch (SQLException e) {
+            ApacheIgniteTableUtils.cleanupConnection(rs, st, con);
             throw new ApacheIgniteTableException("unable to read " + this.tableName + e.getMessage());
         }
         //return false;
@@ -269,7 +303,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         log.info(condition);
 
         StringBuilder deleteCondition = new StringBuilder();
-        PreparedStatement statement;
+        PreparedStatement statement = null;
         try {
             deleteCondition.append("DELETE FROM ").append(this.tableName);
             if (!condition.equals("?")) {
@@ -291,8 +325,9 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             log.info(deleteCondition);
             statement = con.prepareStatement(deleteCondition.toString());
             statement.execute();
-            statement.close();
+            ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
         } catch (SQLException e) {
+            ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
             throw new ApacheIgniteTableException("Error deleting recors from the table: " + this.tableName);
         }
     }
@@ -316,6 +351,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         log.info("updated*****###");
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         String condition = igniteCompiledCondition.getCompiledQuery();
+        PreparedStatement statement = null;
         log.info(condition);
 
         try {
@@ -329,18 +365,17 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                     }
                 }
             }
-            //try{
             StringBuilder updateCondition = new StringBuilder();
             updateCondition.append(" UPDATE ").append(tableName).append(WHITESPACE)
                     .append("SET").append(WHITESPACE).append(this.mapAttributesWithValues(list1)).append("WHERE")
                     .append(WHITESPACE).append(condition);
 
-            PreparedStatement statement = con.prepareStatement(updateCondition.toString());
+            statement = con.prepareStatement(updateCondition.toString());
             statement.execute();
-
-            //}
+            ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
             log.info(updateCondition);
         } catch (SQLException e) {
+            ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
             throw new ApacheIgniteTableException("error updating records " + this.tableName);
         }
     }
@@ -401,7 +436,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             log.info(updateCondition);
             PreparedStatement statement = con.prepareStatement(updateCondition.toString());
             statement.execute();
-            statement.close();
+            // statement.close();
+            ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
             //do throw exception if key other than primary key defined with on condition.
             //check with two primary keys.
         } catch (SQLException e) {
@@ -511,44 +547,50 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
     public void createTable(Annotation store, Annotation primaryKey, Annotation indices) throws SQLException {
 
-        StringBuilder tableCreateQuery = new StringBuilder();
-        List<Element> primaryKeyList = (primaryKey == null) ? new ArrayList<>() : primaryKey.getElements();
-        tableCreateQuery.append("CREATE TABLE IF NOT EXISTS ").append(this.tableName).append(" ( ");
-        this.attributes.forEach(attribute -> {
-            tableCreateQuery.append(attribute.getName()).append(WHITESPACE);
-            switch (attribute.getType()) {
-                case BOOL:
-                    tableCreateQuery.append("boolean ");
-                    break;
-                case DOUBLE:
-                    tableCreateQuery.append("double ");
-                    break;
-                case FLOAT:
-                    tableCreateQuery.append("float ");
-                    break;
-                case INT:
-                    tableCreateQuery.append("integer ");
-                    break;
-                case LONG:
-                    tableCreateQuery.append("long ");
-                    break;
-//                case OBJECT:
-//                    tableCreateQuery.append(binaryType);
-//                    break;
-                case STRING://check in rdbms
-                    tableCreateQuery.append("varchar");
-                    break;
-            }
-
-            tableCreateQuery.append(", ");
-        });
-        tableCreateQuery.append("PRIMARY KEY ( ").append(this.flattenAnnotatedElements(primaryKeyList)).append(")");
-        //tableCreateQuery.delete(tableCreateQuery.length()-2,tableCreateQuery.length());
-        tableCreateQuery.append(" ) ");
-        PreparedStatement sts = con.prepareStatement(tableCreateQuery.toString());
-        sts.execute();
-
-        log.info(tableCreateQuery);
+        PreparedStatement sts = null;
+        try {
+            StringBuilder tableCreateQuery = new StringBuilder();
+            List<Element> primaryKeyList = (primaryKey == null) ? new ArrayList<>() : primaryKey.getElements();
+            tableCreateQuery.append(TABLE_CREATE_QUERY).append(this.tableName).append(OPEN_PARENTHESIS);
+            this.attributes.forEach(attribute -> {
+                tableCreateQuery.append(attribute.getName()).append(WHITESPACE);
+                switch (attribute.getType()) {
+                    case BOOL:
+                        tableCreateQuery.append(BOOLEAN).append(WHITESPACE);
+                        break;
+                    case DOUBLE:
+                        tableCreateQuery.append("double ");
+                        break;
+                    case FLOAT:
+                        tableCreateQuery.append(FLOAT).append(WHITESPACE);
+                        break;
+                    case INT:
+                        tableCreateQuery.append("integer ");
+                        break;
+                    case LONG:
+                        tableCreateQuery.append(LONG);
+                        break;
+                    case OBJECT:
+                        tableCreateQuery.append(binaryType);
+                        break;
+                    case STRING://check in rdbms
+                        tableCreateQuery.append(STRING);
+                        break;
+                }
+                tableCreateQuery.append(SEPARATOR);
+            });
+            tableCreateQuery.append(SQL_PRIMARY_KEY_DEF).append(OPEN_PARENTHESIS).
+                    append(this.flattenAnnotatedElements(primaryKeyList))
+                    .append(CLOSE_PARENTHESIS);
+            tableCreateQuery.append(CLOSE_PARENTHESIS);
+            sts = con.prepareStatement(tableCreateQuery.toString());
+            sts.execute();
+            ApacheIgniteTableUtils.cleanupConnection(null, sts, con);
+            log.info(tableCreateQuery);
+        } catch (SQLException e) {
+            ApacheIgniteTableUtils.cleanupConnection(null, sts, con);
+            throw new ApacheIgniteTableException("table ceation failed " + e.getMessage(), e);
+        }
     }
 
     private String columnNames() {
@@ -578,6 +620,55 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         return values.toString();
     }
 
+    private String convertAttributesValue(Object[] record) {
+
+        StringBuilder values = new StringBuilder();
+        for (int i = 0; i < record.length; i++) {
+            values.append("?").append(" ").append(",");
+
+
+
+        }
+        values.delete(values.length() - 2, values.length());
+        return values.toString();
+    }
+
+    private PreparedStatement bindValuesToAttributes(PreparedStatement sql, Object[] record) {
+
+        try {
+            for (int i = 0; i < attributes.size(); i++) {
+
+                Attribute attribute = attributes.get(i);
+                switch (attribute.getType()) {
+                    case BOOL:
+                        sql.setBoolean(i + 1, Boolean.parseBoolean(record[i].toString()));
+                        break;
+                    case STRING:
+                        sql.setString(i + 1, record[i].toString());
+                        break;
+                    case LONG:
+                        sql.setLong(i + 1, Long.parseLong(record[i].toString()));
+                        break;
+                    case FLOAT:
+                        sql.setFloat(i + 1, Float.parseFloat(record[i].toString()));
+                        break;
+                    case OBJECT:
+                        sql.setObject(i + 1, record[i]);
+                        break;
+                    case INT:
+                        sql.setInt(i + 1, Integer.parseInt(record[i].toString()));
+                        break;
+                    case DOUBLE:
+                        sql.setDouble(i + 1, Double.parseDouble(record[i].toString()));
+
+                }
+            }
+            return sql;
+        } catch (SQLException e) {
+            throw new ApacheIgniteTableException("unable to insert " + e.getMessage());
+        }
+    }
+
     //convert list of elements to a comma separated string.
     public String flattenAnnotatedElements(List<Element> elements) {
 
@@ -592,3 +683,4 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     }
 
 }
+

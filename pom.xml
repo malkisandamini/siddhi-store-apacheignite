@@ -52,6 +52,7 @@
         <testng.version>6.9.10</testng.version>
         <jacoco.maven.version>0.7.8</jacoco.maven.version>
         <ignite.version>2.7.0</ignite.version>
+        <bundle.plugin.version>3.5.0</bundle.plugin.version>
     </properties>
     <dependencyManagement>
         <dependencies>

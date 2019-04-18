@@ -17,6 +17,7 @@
  */
 package org.wso2.extension.siddhi.store.apacheignite;
 
+import org.wso2.siddhi.core.table.record.AbstractQueryableRecordTable;
 import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
 
 /**
@@ -24,30 +25,60 @@ import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
  */
 public class ApacheIgniteCompiledSelection implements CompiledSelection {
 
-//    private ApacheIgniteCompiledCondition compiledSelectClause;
-//    private ApacheIgniteCompiledCondition compiledGroupByClause;
-//    private ApacheIgniteCompiledCondition compiledHavingClause;
-//    private ApacheIgniteCompiledCondition compiledOrderByClause;
-//    private Long limit;
-//    private Long offset;
-//
-//    public ApacheIgniteCompiledSelection(ApacheIgniteCompiledCondition compiledSelectClause,
-//                                         ApacheIgniteCompiledCondition compiledGroupByClause,
-//                                         ApacheIgniteCompiledCondition compiledHavingClause,
-//                                         ApacheIgniteCompiledCondition compiledOrderByClause,
-//                                         Long limit, Long offset) {
-//
-//        this.compiledSelectClause = compiledSelectClause;
-//        this.compiledGroupByClause = compiledGroupByClause;
-//        this.compiledHavingClause = compiledHavingClause;
-//        this.compiledOrderByClause = compiledOrderByClause;
-//        this.limit = limit;
-//        this.offset = offset;
-//    }
+
+    private ApacheIgniteCompiledCondition compiledSelectClause;
+    private ApacheIgniteCompiledCondition compiledGroupByClause;
+    private ApacheIgniteCompiledCondition compiledHavingClause;
+    private ApacheIgniteCompiledCondition compiledOrderByClause;
+    private Long limit;
+    private Long offset;
+
+    public ApacheIgniteCompiledSelection(
+                                            ApacheIgniteCompiledCondition compiledSelectClause,
+                                         ApacheIgniteCompiledCondition compiledGroupByClause,
+                                         ApacheIgniteCompiledCondition compiledHavingClause,
+                                         ApacheIgniteCompiledCondition compiledOrderByClause,
+                                         Long limit, Long offset) {
+
+
+        this.compiledSelectClause = compiledSelectClause;
+        this.compiledGroupByClause = compiledGroupByClause;
+        this.compiledHavingClause = compiledHavingClause;
+        this.compiledOrderByClause = compiledOrderByClause;
+        this.limit = limit;
+        this.offset = offset;
+    }
 
     @Override
     public CompiledSelection cloneCompilation(String s) {
 
-        return null;
+        return new ApacheIgniteCompiledSelection(compiledSelectClause,compiledGroupByClause,
+                compiledHavingClause,compiledOrderByClause,limit,offset);
     }
+
+
+    public ApacheIgniteCompiledCondition getCompiledSelectClause(){
+        return compiledSelectClause;
+    }
+    public ApacheIgniteCompiledCondition getCompiledGroupByClause(){
+        return compiledGroupByClause;
+
+    }
+    public ApacheIgniteCompiledCondition getCompiledHavingClause(){
+        return compiledHavingClause;
+    }
+    public ApacheIgniteCompiledCondition getCompiledOrderByClause(){
+        return compiledOrderByClause;
+    }
+
+    public Long getLimit(){
+        return limit;
+    }
+    public Long getOffset(){
+        return offset;
+    }
+
+//    public List<String> getSelect(){
+//
+//    }
 }

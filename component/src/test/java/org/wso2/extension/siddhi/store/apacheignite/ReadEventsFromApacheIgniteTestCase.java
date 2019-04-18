@@ -67,14 +67,14 @@ public class ReadEventsFromApacheIgniteTestCase {
         }
     }
 
-    @Test(description = "Testing reading  ")
+    @Test(description = "Testing reading ")
     public void readIntoTableTest() throws InterruptedException {
 
         log.info("ReadIntoTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream FooStream (name string);\n" +
-                "define stream OutputStream (checkName string, checkCategory float, checkVolume long);" +
+                "define stream FooStream (name long);\n" +
+                "define stream OutputStream (checkName string, checkVolume long,checkCategory float);" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
                 "username=\"" + USERNAME + "\", password=\"" + PASSWORD
@@ -87,11 +87,13 @@ public class ReadEventsFromApacheIgniteTestCase {
                 "select *\n" +
                 "insert into StockTable;\n" +
                 "@info(name = 'query2')\n " +
-                "from FooStream#window.length(1) join StockTable on StockTable.symbol==FooStream.name \n" +
-                //"from FooStream#window.length(1) join StockTable on StockTable.volume==FooStream.name \n" +
+               // "from FooStream#window.length(1) join StockTable on StockTable.symbol==FooStream.name \n" +
+                "from FooStream#window.length(1) join StockTable on StockTable.volume==FooStream.name \n" +
                 //"from FooStream#window.length(1) join StockTable on StockTable.price+40>FooStream.name \n" +
-                "select StockTable.symbol as checkName, StockTable.price as checkCategory, " +
-                "StockTable.volume as checkVolume\n" +
+                "select StockTable.symbol as checkName, " +
+                "StockTable.volume as checkVolume," +
+                "StockTable.price as checkCategory\n " +
+
                 "insert into OutputStream;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -112,11 +114,14 @@ public class ReadEventsFromApacheIgniteTestCase {
         siddhiAppRuntime.start();
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 100L});
-        stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
+        //stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
+       // stockStream.send(new Object[]{"GG", 12.6F, 100L});
+       // stockStream.send(new Object[]{"GGGGG", 17.6F, 100L});
 
-        fooStream.send(new Object[]{"WS"});
-        fooStream.send(new Object[]{"CSC"});
-        fooStream.send(new Object[]{"IB"});
+        fooStream.send(new Object[]{100});
+//        fooStream.send(new Object[]{"WS"});
+//        fooStream.send(new Object[]{"CSC"});
+//        fooStream.send(new Object[]{"IB"});
 
         Thread.sleep(500);
         //Assert.assertEquals(eventArrived, true, "Event arrived");
@@ -126,4 +131,124 @@ public class ReadEventsFromApacheIgniteTestCase {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test(description = "Testing reading  ")
+    public void readIntoTableTest2() throws InterruptedException {
+
+        log.info("ReadIntoTableTest2");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream FooStream (name long);\n" +
+                "define stream OutputStream (checkName string, checkVolume long,checkCategory float);" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1')\n" +
+                "from StockStream\n" +
+                "select *\n" +
+                "insert into StockTable;\n" +
+                "@info(name = 'query2')\n " +
+                "from FooStream#window.length(1) join StockTable on StockTable.volume+50==FooStream.name \n" +
+                "select StockTable.symbol as checkName, " +
+                "StockTable.volume as checkVolume," +
+                "StockTable.price as checkCategory\n " +
+                "insert into OutputStream;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        stockStream.send(new Object[]{"GOOG", 12.6F, 150L});
+        // stockStream.send(new Object[]{"GG", 12.6F, 100L});
+        // stockStream.send(new Object[]{"GGGGG", 17.6F, 100L});
+
+        fooStream.send(new Object[]{150});
+        fooStream.send(new Object[]{200});
+//        fooStream.send(new Object[]{"CSC"});
+//        fooStream.send(new Object[]{"IB"});
+
+        Thread.sleep(500);
+        //Assert.assertEquals(eventArrived, true, "Event arrived");
+        //Thread.sleep(500);
+        int pointsInTable = 2;
+        // Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Testing reading  ")
+    public void readIntoTableTest3() throws InterruptedException {
+
+        log.info("ReadIntoTableTest2");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream FooStream (name long);\n" +
+                "define stream OutputStream (checkName string,checkCategory float);" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1')\n" +
+                "from StockStream\n" +
+                "select *\n" +
+                "insert into StockTable;\n" +
+                "@info(name = 'query2')\n " +
+                "from FooStream#window.length(1) join StockTable on StockTable.volume+50==FooStream.name \n" +
+                "select StockTable.symbol as checkName, " +
+                "StockTable.price as checkCategory\n " +
+                "insert into OutputStream;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        stockStream.send(new Object[]{"GOOG", 12.6F, 150L});
+        // stockStream.send(new Object[]{"GG", 12.6F, 100L});
+        // stockStream.send(new Object[]{"GGGGG", 17.6F, 100L});
+
+        fooStream.send(new Object[]{150});
+        fooStream.send(new Object[]{200});
+//        fooStream.send(new Object[]{"CSC"});
+//        fooStream.send(new Object[]{"IB"});
+
+        Thread.sleep(500);
+        //Assert.assertEquals(eventArrived, true, "Event arrived");
+        //Thread.sleep(500);
+        int pointsInTable = 2;
+        // Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
+        siddhiAppRuntime.shutdown();
+    }
 }

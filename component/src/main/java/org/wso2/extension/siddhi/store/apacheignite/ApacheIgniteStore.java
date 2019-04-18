@@ -18,6 +18,7 @@ import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
+import org.wso2.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.sql.Connection;
@@ -26,8 +27,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -94,12 +99,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     private String url;
     private String username;
     private String password;
-    private String booleanType;
-    private String doubleType;
-    private String floatType;
-    private String integerType;
-    private String longType;
-    private String stringType;
     private String binaryType;
     private boolean connected;
     private Annotation storeAnnotation;
@@ -109,6 +108,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     private List<Attribute> attributes;
     private List<Integer> primaryKeyAttributePositionList;
     private Connection con;
+    List<SelectAttributeBuilder> selectAttributeBuilders;
 
     /**
      * Initializing the Record Table
@@ -166,17 +166,14 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                 insertQuery = insertQuery.replace(COLUMNS, this.columnNames())
                         .replace(TABLE_NAME, this.tableName)
                         .replace(VALUES, this.convertAttributesValue(record));
-
                 statement = con.prepareStatement(insertQuery);
                 st = this.bindValuesToAttributes(statement, record);
             }
-
             log.info(insertQuery);
             if (st != null) {
                 st.execute();
                 st.close();
             }
-
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
             throw new SiddhiAppRuntimeException("insertion failed " + e.getMessage());
@@ -197,16 +194,18 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         String condition = igniteCompiledCondition.getCompiledQuery();
+        Map<Integer, Object> constantMap = igniteCompiledCondition.getParameterConstants();
         log.info(condition);
-
-        PreparedStatement st ;
-        ResultSet rs ;
+        List<String> attri = new ArrayList<>();
+        PreparedStatement st;
+        ResultSet rs;
         StringBuilder readQuery = new StringBuilder();
         readQuery.append("SELECT ").append(" * ").append("FROM ").append(this.tableName);
         try {
             if (!condition.equals("'?'")) {
                 readQuery.append(" WHERE ");
                 for (Map.Entry<String, Object> map : findConditionParameterMap.entrySet()) {
+
 
                     Object streamVariable = map.getValue();
                     if (streamVariable instanceof String) {
@@ -215,18 +214,27 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                         condition = condition.replaceFirst(Pattern.quote("'?'"), map.getValue().toString());
                     }
                 }
+                for (Map.Entry<Integer, Object> map : constantMap.entrySet()) {
+
+                    Object constant = map.getValue();
+                    if (constant instanceof String) {
+                        condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
+                    } else {
+                        condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
+                    }
+                }
                 readQuery.append(condition);
                 log.info(readQuery);
             }
+
+            for( Attribute at:this.attributes){
+                attri.add(at.getName());
+            }
             st = con.prepareStatement(readQuery.toString());
             rs = st.executeQuery();
-//            if (rs.toString().isEmpty()) {
-//                //ApacheIgniteTableUtils.cleanupConnection(rs, st, con);
-//                log.info("No matching records to be retrieved for condition ");
-//            } else{
-//
-//            }
-            return new ApacheIgniteIterator(con, st, rs, tableName, attributes);
+
+            return new ApacheIgniteIterator(con, st, rs, tableName, attri, this.attributes);
+
         } catch (SQLException e) {
             // ApacheIgniteTableUtils.cleanupConnection(rs, st, con); bug
             throw new ApacheIgniteTableException("unable to read " + this.tableName + e.getMessage());
@@ -247,6 +255,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         String condition = igniteCompiledCondition.getCompiledQuery();
+        Map<Integer, Object> constantMap = igniteCompiledCondition.getParameterConstants();
         ResultSet rs = null;
         PreparedStatement st = null;
         log.info(condition);
@@ -262,6 +271,15 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                         condition = condition.replaceFirst(Pattern.quote("?"), map.getValue().toString());
                     } else {
                         condition = condition.replaceFirst(Pattern.quote("'?'"), map.getValue().toString());
+                    }
+                }
+                for (Map.Entry<Integer, Object> map : constantMap.entrySet()) {
+
+                    Object constant = map.getValue();
+                    if (constant instanceof String) {
+                        condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
+                    } else {
+                        condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
                     }
                 }
                 readQuery.append(condition);
@@ -301,7 +319,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         String condition = igniteCompiledCondition.getCompiledQuery();
         log.info(condition);
-
+        Map<Integer, Object> constantMap = igniteCompiledCondition.getParameterConstants();
         StringBuilder deleteCondition = new StringBuilder();
         PreparedStatement statement = null;
         try {
@@ -317,6 +335,15 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                         } else {
                             condition = condition.replaceFirst(Pattern.quote("'?'"), entry.getValue().toString());
                         }
+                    }
+                }
+                for (Map.Entry<Integer, Object> map : constantMap.entrySet()) {
+
+                    Object constant = map.getValue();
+                    if (constant instanceof String) {
+                        condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
+                    } else {
+                        condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
                     }
                 }
             }
@@ -350,6 +377,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         log.info("updated*****###");
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
+        Map<Integer, Object> constantMap = igniteCompiledCondition.getParameterConstants();
         String condition = igniteCompiledCondition.getCompiledQuery();
         PreparedStatement statement = null;
         log.info(condition);
@@ -364,7 +392,18 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                         condition = condition.replaceFirst(Pattern.quote("'?'"), entry.getValue().toString());
                     }
                 }
+
+                for (Map.Entry<Integer, Object> map1 : constantMap.entrySet()) {
+
+                    Object constant = map1.getValue();
+                    if (constant instanceof String) {
+                        condition = condition.replaceFirst(Pattern.quote("*"), map1.getValue().toString());
+                    } else {
+                        condition = condition.replaceFirst(Pattern.quote("'*'"), map1.getValue().toString());
+                    }
+                }
             }
+
             StringBuilder updateCondition = new StringBuilder();
             updateCondition.append(" UPDATE ").append(tableName).append(WHITESPACE)
                     .append("SET").append(WHITESPACE).append(this.mapAttributesWithValues(list1)).append("WHERE")
@@ -373,6 +412,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             statement = con.prepareStatement(updateCondition.toString());
             statement.execute();
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
+            //do throw exception if key other than primary key defined with on condition.
+            //check with two primary keys.
             log.info(updateCondition);
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
@@ -458,6 +499,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
         expressionBuilder.build(visitor);
         return new ApacheIgniteCompiledCondition(visitor.returnCondition(), visitor.getParameters(),
+                visitor.getParametersConstant(),
                 visitor.isContainsConditionExist(), visitor.getOrdinalOfContainPattern());
     }
 
@@ -529,20 +571,247 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     }
 
     @Override
-    protected RecordIterator<Object[]> query(Map<String, Object> map, CompiledCondition compiledCondition,
+    protected RecordIterator<Object[]> query(Map<String, Object> parameterMap, CompiledCondition compiledCondition,
                                              CompiledSelection compiledSelection, Attribute[] attributes)
             throws ConnectionUnavailableException {
 
-        return null;
+        ApacheIgniteCompiledSelection apacheIgniteCompiledSelection = (ApacheIgniteCompiledSelection) compiledSelection;
+        ApacheIgniteCompiledCondition apacheIgniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
+
+        Map<Integer, Object> consMap = apacheIgniteCompiledCondition.getParameterConstants();
+        PreparedStatement statement;
+        List<String> attri = new ArrayList<>();
+
+        String query = getSelectQuery(apacheIgniteCompiledCondition, apacheIgniteCompiledSelection,
+                parameterMap, consMap);
+        log.info(query);
+        try {
+            statement = con.prepareStatement(query);
+        } catch (SQLException e) {
+            throw new ApacheIgniteTableException("unable to query " + e.getMessage());
+        }
+        try {
+            return new ApacheIgniteIterator(con, statement, statement.executeQuery(), this.tableName, attri, this.attributes);
+        } catch (SQLException e) {
+            throw new ApacheIgniteTableException("unable to execute query " + e.getMessage());
+        }
+    }
+
+    private String getSelectQuery(ApacheIgniteCompiledCondition apacheIgniteCompiledCondition,
+                                  ApacheIgniteCompiledSelection apacheIgniteCompiledSelection,
+                                  Map<String, Object> parameterMap, Map<Integer, Object> constantMap) {
+
+        String selectors = apacheIgniteCompiledSelection.getCompiledSelectClause().getCompiledQuery();
+        log.info(selectors);
+
+        String condition = apacheIgniteCompiledCondition.getCompiledQuery();
+        StringBuilder selectQuery = new StringBuilder("select").append(WHITESPACE);
+        selectQuery.append(selectors).append(WHITESPACE)
+                .append("from").append(WHITESPACE).append(this.tableName).append(WHITESPACE);
+        if (!condition.equals("'*'")) {
+            selectQuery.append("where").append(WHITESPACE);
+            for (Map.Entry<String, Object> entry : parameterMap.entrySet()) {
+                Object streamVariable = entry.getValue();
+                if (streamVariable instanceof String) {
+                    condition = condition.replaceFirst(Pattern.quote("?"), streamVariable.toString());
+                } else {
+                    condition = condition.replaceFirst(Pattern.quote("'?'"), streamVariable.toString());
+                }
+            }
+            for (Map.Entry<Integer, Object> entry : constantMap.entrySet()) {
+                Object constant = entry.getValue();
+                if (constant instanceof String) {
+                    condition = condition.replaceFirst(Pattern.quote("*"), constant.toString());
+                } else {
+                    condition = condition.replaceFirst(Pattern.quote("'*'"), constant.toString());
+                }
+            }
+            selectQuery.append(condition);
+        }
+        log.info(selectQuery.toString());
+        ApacheIgniteCompiledCondition compileGroupByClause = apacheIgniteCompiledSelection.getCompiledGroupByClause();
+        if (compileGroupByClause != null) {
+            String groupByClause = " group by " + compileGroupByClause.getCompiledQuery();
+            selectQuery.append(WHITESPACE).append(groupByClause);
+        }
+        if (apacheIgniteCompiledSelection.getLimit() != null) {
+            selectQuery.append(" limit ").append(apacheIgniteCompiledSelection.getLimit());
+        }
+        if (apacheIgniteCompiledSelection.getOffset() != null) {
+            selectQuery.append(" offset ").append(apacheIgniteCompiledSelection.getOffset());
+        }
+        ApacheIgniteCompiledCondition compileHavingClause = apacheIgniteCompiledSelection.getCompiledHavingClause();
+        if (compileHavingClause != null) {
+            String havingClause = " having " + compileHavingClause.getCompiledQuery();
+            selectQuery.append(WHITESPACE).append(havingClause);
+        }
+
+        ApacheIgniteCompiledCondition compileOrderByClause = apacheIgniteCompiledSelection.getCompiledOrderByClause();
+        if (compileOrderByClause != null) {
+            String orderByClause = " order by " + compileOrderByClause.getCompiledQuery();
+            selectQuery.append(WHITESPACE).append(orderByClause);
+        }
+
+        return selectQuery.toString();
     }
 
     @Override
-    protected CompiledSelection compileSelection(List<SelectAttributeBuilder> list, List<ExpressionBuilder> list1,
-                                                 ExpressionBuilder expressionBuilder,
-                                                 List<OrderByAttributeBuilder> list2,
-                                                 Long aLong, Long aLong1) {
+    protected CompiledSelection compileSelection(List<SelectAttributeBuilder> selectAttributeBuilders,
+                                                 List<ExpressionBuilder> groupByExpressionBuilder,
+                                                 ExpressionBuilder havingExpressionBuilder,
+                                                 List<OrderByAttributeBuilder> orderByAttributeBuilders,
+                                                 Long limit, Long offset) {
 
-        return null;
+        return new ApacheIgniteCompiledSelection(
+                compileSelectClause(selectAttributeBuilders),
+                (groupByExpressionBuilder == null) ? null : compileClause(groupByExpressionBuilder),
+                (havingExpressionBuilder == null) ? null :
+                        compileClause(Collections.singletonList(havingExpressionBuilder)),
+                (orderByAttributeBuilders == null) ? null : compileOrderByClause(orderByAttributeBuilders),
+                limit, offset);
+    }
+
+    private ApacheIgniteCompiledCondition compileSelectClause(List<SelectAttributeBuilder> selectAttributeBuilders) {
+
+        StringBuilder compiledSelectionList = new StringBuilder();
+        SortedMap<Integer, Object> paramMap = new TreeMap<>();
+        SortedMap<Integer, Object> paramConstMap = new TreeMap<>();
+
+        int offset = 0;
+
+        for (SelectAttributeBuilder selectAttributeBuilder : selectAttributeBuilders) {
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            selectAttributeBuilder.getExpressionBuilder().build(visitor);
+
+            String compiledCondition = visitor.returnCondition();
+            log.info(compiledCondition);
+            compiledSelectionList.append(compiledCondition);
+            if (selectAttributeBuilder.getRename() != null && !selectAttributeBuilder.getRename().isEmpty()) {
+
+                compiledSelectionList.append(WHITESPACE).append("AS").append(WHITESPACE)
+                        .append(selectAttributeBuilder.getRename());
+            }
+            compiledSelectionList.append(SEPARATOR);
+            Map<Integer, Object> conditionParamMap = visitor.getParameters();
+            int maxOrdinal = 0;
+            for (Map.Entry<Integer, Object> entry : conditionParamMap.entrySet()) {
+                Integer ordinal = entry.getKey();
+                paramMap.put(ordinal + offset, entry.getValue());
+                if (ordinal > maxOrdinal) {
+                    maxOrdinal = ordinal;
+                }
+            }
+            offset = maxOrdinal;
+
+        }
+        if (compiledSelectionList.length() > 0) {
+            compiledSelectionList.setLength(compiledSelectionList.length() - 1);//remove last comma
+        }
+        return new ApacheIgniteCompiledCondition(compiledSelectionList.toString(), paramMap, paramConstMap,
+                false, 0);
+    }
+
+
+    //*****************
+    private List<String> getSelectList(List<SelectAttributeBuilder> selectAttributeBuilders) {
+
+        List<String> attri=new ArrayList<>();
+        for (SelectAttributeBuilder selectAttributeBuilder : selectAttributeBuilders) {
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            selectAttributeBuilder.getExpressionBuilder().build(visitor);
+
+            String compiledCondition = visitor.returnCondition();
+            attri.add(compiledCondition);
+        }
+        return attri;
+    }
+    //********************
+
+
+    private ApacheIgniteCompiledCondition compileClause(List<ExpressionBuilder> expressionBuilders) {
+
+        StringBuilder compiledSelectionList = new StringBuilder();
+        SortedMap<Integer, Object> paramMap = new TreeMap<>();
+        SortedMap<Integer, Object> paramCons = new TreeMap<>();
+        //  Map<Integer, Object> constantMap = igniteCompiledCondition.getParameterConstants();
+
+        int offset = 0;
+        for (ExpressionBuilder expressionBuilder : expressionBuilders) {
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            expressionBuilder.build(visitor);
+            String compiledCondition = visitor.returnCondition();
+            compiledSelectionList.append(compiledCondition).append(SEPARATOR);
+            Map<Integer, Object> conditionParamMap = visitor.getParameters();
+            Map<Integer, Object> conditionConstMap = visitor.getParametersConstant();
+            int maxOrdinal = 0;
+            for (Map.Entry<Integer, Object> entry : conditionParamMap.entrySet()) {
+                Integer ordinal = entry.getKey();
+                paramMap.put(ordinal + offset, entry.getValue());
+                if (ordinal > maxOrdinal) {
+                    maxOrdinal = ordinal;
+                }
+            }
+            for (Map.Entry<Integer, Object> entry : conditionConstMap.entrySet()) {
+                Integer ordinal = entry.getKey();
+                paramCons.put(ordinal + offset, entry.getValue());
+                if (ordinal > maxOrdinal) {
+                    maxOrdinal = ordinal;
+                }
+            }
+            offset = maxOrdinal;
+        }
+
+        if (compiledSelectionList.length() > 0) {
+            compiledSelectionList.setLength(compiledSelectionList.length() - 1);
+        }
+        String condition = compiledSelectionList.toString();
+        for (Map.Entry<Integer, Object> map : paramCons.entrySet()) {
+
+            Object constant = map.getValue();
+            if (constant instanceof String) {
+                condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
+            } else {
+                condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
+            }
+        }
+
+        return new ApacheIgniteCompiledCondition(condition, paramMap, paramCons,
+                false, 0);
+    }
+
+    private ApacheIgniteCompiledCondition compileOrderByClause(List<OrderByAttributeBuilder> orderByAttributeBuilders) {
+
+        StringBuilder compiledSelectionList = new StringBuilder();
+        SortedMap<Integer, Object> paramMap = new TreeMap<>();
+        int offset = 0;
+        for (OrderByAttributeBuilder orderByAttributeBuilder : orderByAttributeBuilders) {
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            orderByAttributeBuilder.getExpressionBuilder().build(visitor);
+            String compiledCondition = visitor.returnCondition();
+            compiledSelectionList.append(compiledCondition);
+            OrderByAttribute.Order order = orderByAttributeBuilder.getOrder();
+            if (order == null) {
+                compiledSelectionList.append(SEPARATOR);
+            } else {
+                compiledSelectionList.append(WHITESPACE).append(order.toString()).append(SEPARATOR);
+            }
+            Map<Integer, Object> conditionParamMap = visitor.getParameters();
+            int maxOrdinal = 0;
+            for (Map.Entry<Integer, Object> entry : conditionParamMap.entrySet()) {
+                Integer ordinal = entry.getKey();
+                paramMap.put(ordinal + offset, entry.getValue());
+                if (ordinal > maxOrdinal) {
+                    maxOrdinal = ordinal;
+                }
+
+            }
+            offset = maxOrdinal;
+        }
+        if (compiledSelectionList.length() > 0) {
+            compiledSelectionList.setLength(compiledSelectionList.length() - 1);
+        }
+        return new ApacheIgniteCompiledCondition(compiledSelectionList.toString(), paramMap, null,
+                false, 0);
     }
 
     public void createTable(Annotation store, Annotation primaryKey, Annotation indices) throws SQLException {
@@ -589,7 +858,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             log.info(tableCreateQuery);
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, sts, con);
-            throw new ApacheIgniteTableException("table ceation failed " + e.getMessage(), e);
+            throw new ApacheIgniteTableException("table creation failed " + e.getMessage(), e);
         }
     }
 
@@ -625,8 +894,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         StringBuilder values = new StringBuilder();
         for (int i = 0; i < record.length; i++) {
             values.append("?").append(" ").append(",");
-
-
 
         }
         values.delete(values.length() - 2, values.length());

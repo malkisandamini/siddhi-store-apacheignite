@@ -99,4 +99,42 @@ public class DeleteFromApacheIgniteTestCase {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test(description = "Testing insertion ")
+    public void deleteFromTableTest2() throws InterruptedException {
+
+        log.info("insertIntoTableTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete StockTable " +
+                "   on StockTable.symbol == 'WSO2' ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 325.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"CSC", 85.6f, 200L});
+        deleteStockStream.send(new Object[]{"WSO2"});
+        deleteStockStream.send(new Object[]{"IBM"});
+        //deleteStockStream.send(new Object[]{75.6f});
+        Thread.sleep(500);
+//        int pointsInTable = 1;
+//        Assert.assertEquals(pointsInTable, 1, "Definition/Insertion failed");
+        siddhiAppRuntime.shutdown();
+    }
+
 }

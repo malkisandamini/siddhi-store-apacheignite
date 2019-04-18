@@ -139,4 +139,71 @@ public class ContainsIn {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test(description = "Testing contains in  ")
+    public void containsInWithTwoConditionsTableTest() throws InterruptedException {
+
+        log.info("containsInWithTwoConditionsTableTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream FooStream (name string,value long);\n" +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1')\n" +
+                "from StockStream\n" +
+                "select *\n" +
+                "insert into StockTable;\n" +
+                "@info(name = 'query2')\n " +
+                "from FooStream \n" +
+                "[( StockTable.symbol==name and StockTable.volume ==value) in StockTable]\n" +
+                "insert into OutputStream;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        // InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long l, Event[] events, Event[] events1) {
+
+                EventPrinter.print(l, events, events1);
+                if (events != null) {
+                    eventArrived = true;
+                    inEventCount++;
+                    for (Event event : events) {
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"WS", 100}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"IB", 10}, event.getData());
+                                break;
+                        }
+                    }
+                } else {
+                    eventArrived = false;
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
+
+        Thread.sleep(500);
+        int pointsInTable = 2;
+
+        fooStream.send(new Object[]{"WS", 100});
+        fooStream.send(new Object[]{"IB", 10});
+        fooStream.send(new Object[]{"WSO22", 100});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        Assert.assertEquals(inEventCount, 1, "Number of success events");
+        Assert.assertEquals(eventArrived, true, "success");
+        Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
+        siddhiAppRuntime.shutdown();
+    }
+
 }

@@ -29,15 +29,18 @@ public class ApacheIgniteCompiledCondition implements CompiledCondition {
 
     private String compiledQuery;
     private SortedMap<Integer, Object> parameters;
+    private SortedMap<Integer, Object> parametersConstant;
     private boolean isContainsConditionExists;
     private int ordinalOfContainPattern;
 
     public ApacheIgniteCompiledCondition(String compiledQuery, SortedMap<Integer, Object> parameters,
+                                         SortedMap<Integer, Object> parametersConstant,
                                          boolean isContainsConditionExists, int
                                                  ordinalOfContainPattern) {
 
         this.compiledQuery = compiledQuery;
         this.parameters = parameters;
+        this.parametersConstant = parametersConstant;
         this.isContainsConditionExists = isContainsConditionExists;
         this.ordinalOfContainPattern = ordinalOfContainPattern;
     }
@@ -45,7 +48,8 @@ public class ApacheIgniteCompiledCondition implements CompiledCondition {
     @Override
     public CompiledCondition cloneCompilation(String s) {
 
-        return new ApacheIgniteCompiledCondition(this.compiledQuery, this.parameters, this.isContainsConditionExists,
+        return new ApacheIgniteCompiledCondition(this.compiledQuery, this.parameters, this.parametersConstant,
+                this.isContainsConditionExists,
                 this.ordinalOfContainPattern);
     }
 
@@ -72,5 +76,10 @@ public class ApacheIgniteCompiledCondition implements CompiledCondition {
     public int getOrdinalOfContainPattern() {
 
         return ordinalOfContainPattern;
+    }
+
+    public SortedMap<Integer, Object> getParameterConstants() {
+
+        return parametersConstant;
     }
 }

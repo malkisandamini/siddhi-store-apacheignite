@@ -29,7 +29,7 @@ import java.util.TreeMap;
 
 /**
  * Class which is used by the Siddhi runtime for instructions on converting the SiddhiQL condition to the condition
- *   format understood by the Apache ignite
+ * format understood by the Apache ignite
  */
 public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
 
@@ -38,7 +38,9 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     private String tableName;
 
     private Map<String, Object> placeholders;
+    private Map<String, Object> placeholdersConstant;
     private SortedMap<Integer, Object> parameters;
+    private SortedMap<Integer, Object> parametersConstant;
 
     private int streamVarCount;
     private int constantCount;
@@ -54,10 +56,12 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         this.streamVarCount = 0;
         this.constantCount = 0;
         this.placeholders = new HashMap<>();
+        this.placeholdersConstant = new HashMap<>();
         this.parameters = new TreeMap<>();
+        this.parametersConstant = new TreeMap<>();
     }
 
-    private ApacheIgniteConditionVisitor() {
+    public ApacheIgniteConditionVisitor() {
         //preventing initialization
     }
 
@@ -75,6 +79,11 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     public SortedMap<Integer, Object> getParameters() {
 
         return this.parameters;
+    }
+
+    public SortedMap<Integer, Object> getParametersConstant() {
+
+        return this.parametersConstant;
     }
 
     public boolean isContainsConditionExist() {
@@ -237,14 +246,18 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitConstant(Object value, Attribute.Type type) {
 
-        String name;
-        if (nextProcessContainsPattern) {
-            name = this.generatePatternConstantName();
-            nextProcessContainsPattern = false;
-        } else {
-            name = this.generateConstantName();
-        }
-        this.placeholders.put(name, new Constant(value, type));
+//        String name;
+//        if (nextProcessContainsPattern) {
+//            name = this.generatePatternConstantName();
+//            nextProcessContainsPattern = false;
+//        } else {
+//            name = this.generateConstantName();
+//        }
+//        this.placeholders.put(name, new Constant(value, type));
+//        condition.append("[").append(name).append("]").append(ApacheIgniteConstants.WHITESPACE);
+
+        String name = this.generateConstantName();
+        this.placeholdersConstant.put(name, value);
         condition.append("[").append(name).append("]").append(ApacheIgniteConstants.WHITESPACE);
     }
 
@@ -313,9 +326,9 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
             isContainsConditionExist = true;
             nextProcessContainsPattern = true;
         } else {
-            throw new OperationNotSupportedException("The RDBMS Event table does not support function namespaces, " +
+            throw new OperationNotSupportedException("The  Event table does not support function namespaces, " +
                     "but namespace '" + namespace + "' was specified. Please use functions supported by the " +
-                    "defined RDBMS data store.");
+                    "defined * data store.");
         }
     }
 
@@ -325,9 +338,9 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         if (ApacheIgniteTableUtils.isEmpty(namespace) || isContainsConditionExist) {
             condition.append(ApacheIgniteConstants.CLOSE_PARENTHESIS).append(ApacheIgniteConstants.WHITESPACE);
         } else {
-            throw new OperationNotSupportedException("The RDBMS Event table does not support function namespaces, " +
+            throw new OperationNotSupportedException("The  Event table does not support function namespaces, " +
                     "but namespace '" + namespace + "' was specified. Please use functions supported by the " +
-                    "defined RDBMS data store.");
+                    "defined * data store.");
         }
     }
 
@@ -344,13 +357,8 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
 
-        String name;
-        if (nextProcessContainsPattern) {
-            name = this.generatePatternStreamVarName();
-            nextProcessContainsPattern = false;
-        } else {
-            name = this.generateStreamVarName();
-        }
+        String name = this.generateStreamVarName();
+
         this.placeholders.put(name, new Attribute(id, type));
         condition.append("[").append(name).append("]").append(ApacheIgniteConstants.WHITESPACE);
     }
@@ -383,20 +391,27 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         String query = this.condition.toString();
         String[] tokens = query.split("\\[");
         int ordinal = 1;
+        int ordinalCon = 1;
         for (String token : tokens) {
             if (token.contains("]")) {
                 String candidate = token.substring(0, token.indexOf("]"));
                 if (this.placeholders.containsKey(candidate)) {
                     this.parameters.put(ordinal, this.placeholders.get(candidate));
                     ordinal++;
-                    if (candidate.equals("pattern-value")) {
-                        ordinalOfContainPattern = ordinal;
-                    }
+//                    if (candidate.equals("pattern-value")) {
+//                        ordinalOfContainPattern = ordinal;
+//                    }
+                } else if (this.placeholdersConstant.containsKey(candidate)) {
+                    this.parametersConstant.put(ordinalCon, this.placeholdersConstant.get(candidate));
+                    ordinalCon++;
                 }
             }
         }
         for (String placeholder : this.placeholders.keySet()) {
             query = query.replace("[" + placeholder + "]", "'?'");
+        }
+        for (String placeholder : this.placeholdersConstant.keySet()) {
+            query = query.replace("[" + placeholder + "]", "'*'");
         }
         this.finalCompiledCondition = query;
     }

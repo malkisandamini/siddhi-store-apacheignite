@@ -47,14 +47,14 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
     private Object[] nextValue;
 
     public ApacheIgniteIterator(Connection con, PreparedStatement statement, ResultSet rs, String tableName,
-                                List<String> attri,List<Attribute> attributes) {
+                                List<String> attri, List<Attribute> attributes) {
 
 //        this.connection = con;
 //        this.statement = statement;
         this.resultSet = rs;
         this.tableName = tableName;
         this.attri = attri;
-        this.attributes=attributes;
+        this.attributes = attributes;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
 
         try {
             return this.extractRecord(this.resultSet);
-        } catch (SQLException  e) {
+        } catch (SQLException e) {
             throw new ApacheIgniteTableException("Error retrieving records from table '" + this.tableName + "': "
                     + e.getMessage(), e);
         }
@@ -84,33 +84,34 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
 
         List<Object> result = new ArrayList<>();
         for (Attribute attribute : attributes) {
-            for(String att:attri){
-            if(attribute.getName().equalsIgnoreCase(att)) {
-                switch (attribute.getType()) {
-                    case BOOL:
-                        result.add(rs.getBoolean(attribute.getName()));
-                        break;
-                    case DOUBLE:
-                        result.add(rs.getDouble(attribute.getName()));
-                        break;
-                    case FLOAT:
-                        result.add(rs.getFloat(attribute.getName()));
-                        break;
-                    case INT:
-                        result.add(rs.getInt(attribute.getName()));
-                        break;
-                    case LONG:
-                        result.add(rs.getLong(attribute.getName()));
-                        break;
-                    case OBJECT:
-                        result.add(rs.getObject(attribute.getName()));
-                        break;
-                    case STRING:
-                        result.add(rs.getString(attribute.getName()));
-                        break;
+            for (String att : attri) {
+                if (attribute.getName().equalsIgnoreCase(att)) {
+                    switch (attribute.getType()) {
+                        case BOOL:
+                            result.add(rs.getBoolean(attribute.getName()));
+                            break;
+                        case DOUBLE:
+                            result.add(rs.getDouble(attribute.getName()));
+                            break;
+                        case FLOAT:
+                            result.add(rs.getFloat(attribute.getName()));
+                            break;
+                        case INT:
+                            result.add(rs.getInt(attribute.getName()));
+                            break;
+                        case LONG:
+                            result.add(rs.getLong(attribute.getName()));
+                            break;
+                        case OBJECT:
+                            result.add(rs.getObject(attribute.getName()));
+                            break;
+                        case STRING:
+                            result.add(rs.getString(attribute.getName()));
+                            break;
 
+                    }
                 }
-            }}
+            }
         }
         return result.toArray();
     }

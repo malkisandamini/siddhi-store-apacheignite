@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ApacheIgniteTestUtils {
@@ -38,15 +39,38 @@ public class ApacheIgniteTestUtils {
 
     }
 
-    public static void dropTable(String tableName) throws SQLException {
+    public static void dropTable(String tableName) throws SQLException{
 
         try {
-            Connection con = DriverManager.getConnection("jdbc:ignite:thin://127.0.0.1/");
+            Connection con = DriverManager.getConnection(URL);
             PreparedStatement st = con.prepareStatement("drop table " + tableName);
             st.execute();
         } catch (SQLException e) {
             log.debug("clearing table failed due to " + e.getMessage());
+            throw e;
         }
     }
 
+    public static int getRowsInTable(String tableName) throws SQLException {
+
+        PreparedStatement statement = null;
+        Connection con = null;
+        try {
+             con = DriverManager.getConnection(URL);
+            statement = con.prepareStatement("SELECT count(*) FROM " + tableName);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            } else {
+                return 0;
+            }
+        } catch (SQLException e) {
+            log.error("Getting rows in table " + tableName + " failed due to " + e.getMessage(), e);
+            throw e;
+        }
+//        finally {
+//            ApacheIgniteTableUtils.cleanupConnection(null,statement,con);
+//        }
+
+    }
 }

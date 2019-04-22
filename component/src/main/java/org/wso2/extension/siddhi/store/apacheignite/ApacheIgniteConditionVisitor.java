@@ -35,7 +35,6 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
 
     private StringBuilder condition;
     private String finalCompiledCondition;
-    private String tableName;
 
     private Map<String, Object> placeholders;
     private Map<String, Object> placeholdersConstant;
@@ -46,12 +45,11 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     private int constantCount;
 
     private boolean isContainsConditionExist;
-    private boolean nextProcessContainsPattern;
     private int ordinalOfContainPattern = 1;
 
     public ApacheIgniteConditionVisitor(String tableName) {
 
-        this.tableName = tableName;
+      //  this.tableName = tableName;
         this.condition = new StringBuilder();
         this.streamVarCount = 0;
         this.constantCount = 0;
@@ -324,7 +322,7 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         } else if ((namespace.trim().equals("str") && functionName.equals("contains"))) {
             condition.append("CONTAINS").append(ApacheIgniteConstants.OPEN_PARENTHESIS);
             isContainsConditionExist = true;
-            nextProcessContainsPattern = true;
+           // nextProcessContainsPattern = true;
         } else {
             throw new OperationNotSupportedException("The  Event table does not support function namespaces, " +
                     "but namespace '" + namespace + "' was specified. Please use functions supported by the " +
@@ -371,7 +369,8 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
 
-        condition.append(this.tableName).append(".").append(attributeName).append(ApacheIgniteConstants.WHITESPACE);
+        //condition.append(this.tableName).append(".")
+        condition.append(attributeName).append(ApacheIgniteConstants.WHITESPACE);
     }
 
     @Override
@@ -439,29 +438,29 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         this.constantCount++;
         return name;
     }
+//
+//    /**
+//     * Method for generating a temporary placeholder for contains pattern as stream variables.
+//     *
+//     * @return a placeholder string of known format.
+//     */
+//    private String generatePatternStreamVarName() {
+//
+//        String name = "pattern-value" + this.streamVarCount;
+//        this.streamVarCount++;
+//        return name;
+//    }
 
-    /**
-     * Method for generating a temporary placeholder for contains pattern as stream variables.
-     *
-     * @return a placeholder string of known format.
-     */
-    private String generatePatternStreamVarName() {
-
-        String name = "pattern-value" + this.streamVarCount;
-        this.streamVarCount++;
-        return name;
-    }
-
-    /**
-     * Method for generating a temporary placeholder for contains pattern as constants.
-     *
-     * @return a placeholder string of known format.
-     */
-    private String generatePatternConstantName() {
-
-        String name = "pattern-value" + this.constantCount;
-        this.constantCount++;
-        return name;
-    }
+//    /**
+//     * Method for generating a temporary placeholder for contains pattern as constants.
+//     *
+//     * @return a placeholder string of known format.
+//     */
+//    private String generatePatternConstantName() {
+//
+//        String name = "pattern-value" + this.constantCount;
+//        this.constantCount++;
+//        return name;
+//    }
 
 }

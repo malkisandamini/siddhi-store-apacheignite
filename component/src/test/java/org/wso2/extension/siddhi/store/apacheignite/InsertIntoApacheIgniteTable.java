@@ -42,13 +42,13 @@ public class InsertIntoApacheIgniteTable {
     @BeforeClass
     public static void startTest() {
 
-        log.info("test started");
+        log.info("== Apache Ignite Table INSERT tests started ==");
     }
 
     @AfterClass
     public static void shutdown() {
 
-        log.info("test completed");
+        log.info("==  Apache Ignite Table INSERT tests completed==");
     }
 
     @BeforeMethod
@@ -61,11 +61,37 @@ public class InsertIntoApacheIgniteTable {
             log.info("Test case ignored due to " + e.getMessage());
         }
     }
+    @Test(description = "Testing insertion with single primary key ")
+    public void insertIntoTableWithSinglePrimaryKeyTest() throws InterruptedException,SQLException {
 
-    @Test(description = "Testing deletion ")
-    public void insertIntoTableTest() throws InterruptedException {
+        log.info("insertIntoTableWithSinglePrimaryKeyTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "insert into StockTable ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        Thread.sleep(500);
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 2, "Insertion failed");
+        siddhiAppRuntime.shutdown();
+    }
 
-        log.info("insertIntoTableWithSingleTagKeyTest");
+    @Test(description = "Testing insertion with two primary keys ")
+    public void insertIntoTableWithTwoPrimaryKeysTest() throws InterruptedException,SQLException {
+
+        log.info("insertIntoTableWithTwoPrimaryKeysTest");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -85,8 +111,36 @@ public class InsertIntoApacheIgniteTable {
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 100L});
         Thread.sleep(500);
-        int pointsInTable = 2;
-        Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 2, "Insertion failed");
         siddhiAppRuntime.shutdown();
     }
+    @Test(description = "Testing insertion with specific fields ")
+    public void insertIntoTableWithSpecificFields() throws InterruptedException,SQLException {
+
+        log.info("insertIntoTableWithSpecificFieldsTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price\n" +
+                "insert into StockTable ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f});
+        stockStream.send(new Object[]{"IB", 75.6f});
+        Thread.sleep(500);
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 2, "Insertion failed");
+        siddhiAppRuntime.shutdown();
+    }
+
 }

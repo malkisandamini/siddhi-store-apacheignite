@@ -115,11 +115,15 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             <!--org.wso2.extension.siddhi.store.apacheignite,-->
-                            org.wso2.extension.siddhi.store.apacheignite.*
+                            org.wso2.extension.siddhi.store.apacheignite.*,
+                            org.apache.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.*
+                        </Private-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF

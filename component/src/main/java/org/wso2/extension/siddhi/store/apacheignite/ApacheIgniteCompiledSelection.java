@@ -17,14 +17,14 @@
  */
 package org.wso2.extension.siddhi.store.apacheignite;
 
-import org.wso2.siddhi.core.table.record.AbstractQueryableRecordTable;
 import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
+
+import java.util.List;
 
 /**
  * Implementation of class corresponding to Apache Ignite store
  */
 public class ApacheIgniteCompiledSelection implements CompiledSelection {
-
 
     private ApacheIgniteCompiledCondition compiledSelectClause;
     private ApacheIgniteCompiledCondition compiledGroupByClause;
@@ -32,14 +32,14 @@ public class ApacheIgniteCompiledSelection implements CompiledSelection {
     private ApacheIgniteCompiledCondition compiledOrderByClause;
     private Long limit;
     private Long offset;
+    private List<String> selectAttributes;
 
     public ApacheIgniteCompiledSelection(
-                                            ApacheIgniteCompiledCondition compiledSelectClause,
-                                         ApacheIgniteCompiledCondition compiledGroupByClause,
-                                         ApacheIgniteCompiledCondition compiledHavingClause,
-                                         ApacheIgniteCompiledCondition compiledOrderByClause,
-                                         Long limit, Long offset) {
-
+            ApacheIgniteCompiledCondition compiledSelectClause,
+            ApacheIgniteCompiledCondition compiledGroupByClause,
+            ApacheIgniteCompiledCondition compiledHavingClause,
+            ApacheIgniteCompiledCondition compiledOrderByClause,
+            Long limit, Long offset, List<String> selectAttributes) {
 
         this.compiledSelectClause = compiledSelectClause;
         this.compiledGroupByClause = compiledGroupByClause;
@@ -47,38 +47,50 @@ public class ApacheIgniteCompiledSelection implements CompiledSelection {
         this.compiledOrderByClause = compiledOrderByClause;
         this.limit = limit;
         this.offset = offset;
+        this.selectAttributes = selectAttributes;
     }
 
     @Override
     public CompiledSelection cloneCompilation(String s) {
 
-        return new ApacheIgniteCompiledSelection(compiledSelectClause,compiledGroupByClause,
-                compiledHavingClause,compiledOrderByClause,limit,offset);
+        return new ApacheIgniteCompiledSelection(compiledSelectClause, compiledGroupByClause,
+                compiledHavingClause, compiledOrderByClause, limit, offset, selectAttributes);
     }
 
+    public ApacheIgniteCompiledCondition getCompiledSelectClause() {
 
-    public ApacheIgniteCompiledCondition getCompiledSelectClause(){
         return compiledSelectClause;
     }
-    public ApacheIgniteCompiledCondition getCompiledGroupByClause(){
+
+    public ApacheIgniteCompiledCondition getCompiledGroupByClause() {
+
         return compiledGroupByClause;
 
     }
-    public ApacheIgniteCompiledCondition getCompiledHavingClause(){
+
+    public ApacheIgniteCompiledCondition getCompiledHavingClause() {
+
         return compiledHavingClause;
     }
-    public ApacheIgniteCompiledCondition getCompiledOrderByClause(){
+
+    public ApacheIgniteCompiledCondition getCompiledOrderByClause() {
+
         return compiledOrderByClause;
     }
 
-    public Long getLimit(){
+    public Long getLimit() {
+
         return limit;
     }
-    public Long getOffset(){
+
+    public Long getOffset() {
+
         return offset;
     }
 
-//    public List<String> getSelect(){
-//
-//    }
+    public List<String> getSelectedAttributes() {
+
+        return selectAttributes;
+    }
+
 }

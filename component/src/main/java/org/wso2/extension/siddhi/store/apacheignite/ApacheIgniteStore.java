@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.extension.siddhi.store.apacheignite;
 
 import org.apache.commons.logging.Log;
@@ -27,7 +44,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +124,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     private List<Attribute> attributes;
     private List<Integer> primaryKeyAttributePositionList;
     private Connection con;
-    List<SelectAttributeBuilder> selectAttributeBuilders;
 
     /**
      * Initializing the Record Table
@@ -198,42 +213,23 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         log.info(condition);
         List<String> attri = new ArrayList<>();
         PreparedStatement st;
-        ResultSet rs;
         StringBuilder readQuery = new StringBuilder();
         readQuery.append("SELECT ").append(" * ").append("FROM ").append(this.tableName);
         try {
             if (!condition.equals("'?'")) {
                 readQuery.append(" WHERE ");
-                for (Map.Entry<String, Object> map : findConditionParameterMap.entrySet()) {
 
-
-                    Object streamVariable = map.getValue();
-                    if (streamVariable instanceof String) {
-                        condition = condition.replaceFirst(Pattern.quote("?"), map.getValue().toString());
-                    } else {
-                        condition = condition.replaceFirst(Pattern.quote("'?'"), map.getValue().toString());
-                    }
-                }
-                for (Map.Entry<Integer, Object> map : constantMap.entrySet()) {
-
-                    Object constant = map.getValue();
-                    if (constant instanceof String) {
-                        condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
-                    } else {
-                        condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
-                    }
-                }
+                condition = this.replaceConditionWithParameter(condition, findConditionParameterMap, constantMap);
+                log.info(condition);
                 readQuery.append(condition);
-                log.info(readQuery);
             }
 
-            for( Attribute at:this.attributes){
+            log.info(readQuery.toString());
+            for (Attribute at : this.attributes) {
                 attri.add(at.getName());
             }
             st = con.prepareStatement(readQuery.toString());
-            rs = st.executeQuery();
-
-            return new ApacheIgniteIterator(con, st, rs, tableName, attri, this.attributes);
+            return new ApacheIgniteIterator(con, st, st.executeQuery(), tableName, attri, this.attributes);
 
         } catch (SQLException e) {
             // ApacheIgniteTableUtils.cleanupConnection(rs, st, con); bug
@@ -264,27 +260,11 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         try {
             if (!condition.equals("'?'")) {
                 readQuery.append(" WHERE ");
-                for (Map.Entry<String, Object> map : containsConditionParameterMap.entrySet()) {
-
-                    Object streamVariable = map.getValue();
-                    if (streamVariable instanceof String) {
-                        condition = condition.replaceFirst(Pattern.quote("?"), map.getValue().toString());
-                    } else {
-                        condition = condition.replaceFirst(Pattern.quote("'?'"), map.getValue().toString());
-                    }
-                }
-                for (Map.Entry<Integer, Object> map : constantMap.entrySet()) {
-
-                    Object constant = map.getValue();
-                    if (constant instanceof String) {
-                        condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
-                    } else {
-                        condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
-                    }
-                }
+                condition = this.replaceConditionWithParameter(condition, containsConditionParameterMap, constantMap);
                 readQuery.append(condition);
-                log.info(readQuery);
             }
+
+            log.info(readQuery.toString());
             st = con.prepareStatement(readQuery.toString());
             rs = st.executeQuery();
             if (rs.next()) {
@@ -327,29 +307,12 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             if (!condition.equals("?")) {
                 deleteCondition.append(" WHERE ");
                 for (Map<String, Object> map : deleteConditionParameterMaps) {
-
-                    for (Map.Entry<String, Object> entry : map.entrySet()) {
-                        Object streamVariable = entry.getValue();
-                        if (streamVariable instanceof String) {
-                            condition = condition.replaceFirst(Pattern.quote("?"), entry.getValue().toString());
-                        } else {
-                            condition = condition.replaceFirst(Pattern.quote("'?'"), entry.getValue().toString());
-                        }
-                    }
+                    condition = this.replaceConditionWithParameter(condition, map, constantMap);
                 }
-                for (Map.Entry<Integer, Object> map : constantMap.entrySet()) {
-
-                    Object constant = map.getValue();
-                    if (constant instanceof String) {
-                        condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
-                    } else {
-                        condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
-                    }
-                }
+                deleteCondition.append(condition);
             }
-            log.info(condition);
-            deleteCondition.append(condition);
-            log.info(deleteCondition);
+
+            log.info(deleteCondition.toString());
             statement = con.prepareStatement(deleteCondition.toString());
             statement.execute();
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
@@ -375,7 +338,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                           Map<String, CompiledExpression> map, List<Map<String, Object>> list1)
             throws ConnectionUnavailableException {
 
-        log.info("updated*****###");
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         Map<Integer, Object> constantMap = igniteCompiledCondition.getParameterConstants();
         String condition = igniteCompiledCondition.getCompiledQuery();
@@ -384,24 +346,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         try {
             for (Map<String, Object> mapCondition : list) {
-                for (Map.Entry<String, Object> entry : mapCondition.entrySet()) {
-                    Object streamVariable = entry.getValue();
-                    if (streamVariable instanceof String) {
-                        condition = condition.replaceFirst(Pattern.quote("?"), entry.getValue().toString());
-                    } else {
-                        condition = condition.replaceFirst(Pattern.quote("'?'"), entry.getValue().toString());
-                    }
-                }
-
-                for (Map.Entry<Integer, Object> map1 : constantMap.entrySet()) {
-
-                    Object constant = map1.getValue();
-                    if (constant instanceof String) {
-                        condition = condition.replaceFirst(Pattern.quote("*"), map1.getValue().toString());
-                    } else {
-                        condition = condition.replaceFirst(Pattern.quote("'*'"), map1.getValue().toString());
-                    }
-                }
+                condition = this.replaceConditionWithParameter(condition, mapCondition, constantMap);
             }
 
             StringBuilder updateCondition = new StringBuilder();
@@ -462,7 +407,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                                Map<String, CompiledExpression> map, List<Map<String, Object>> list1,
                                List<Object[]> list2) throws ConnectionUnavailableException {
 
-        log.info("updated*************");
         ApacheIgniteCompiledCondition igniteCompiledCondition = (ApacheIgniteCompiledCondition) compiledCondition;
         String condition = igniteCompiledCondition.getCompiledQuery();
         log.info(condition);
@@ -580,10 +524,12 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         Map<Integer, Object> consMap = apacheIgniteCompiledCondition.getParameterConstants();
         PreparedStatement statement;
-        List<String> attri = new ArrayList<>();
+        List<String> attri;
 
         String query = getSelectQuery(apacheIgniteCompiledCondition, apacheIgniteCompiledSelection,
                 parameterMap, consMap);
+
+        attri = apacheIgniteCompiledSelection.getSelectedAttributes();
         log.info(query);
         try {
             statement = con.prepareStatement(query);
@@ -591,7 +537,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             throw new ApacheIgniteTableException("unable to query " + e.getMessage());
         }
         try {
-            return new ApacheIgniteIterator(con, statement, statement.executeQuery(), this.tableName, attri, this.attributes);
+            return new ApacheIgniteIterator(con, statement, statement.executeQuery(),
+                    this.tableName, attri, this.attributes);
         } catch (SQLException e) {
             throw new ApacheIgniteTableException("unable to execute query " + e.getMessage());
         }
@@ -663,12 +610,13 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                                                  Long limit, Long offset) {
 
         return new ApacheIgniteCompiledSelection(
+
                 compileSelectClause(selectAttributeBuilders),
                 (groupByExpressionBuilder == null) ? null : compileClause(groupByExpressionBuilder),
                 (havingExpressionBuilder == null) ? null :
                         compileClause(Collections.singletonList(havingExpressionBuilder)),
                 (orderByAttributeBuilders == null) ? null : compileOrderByClause(orderByAttributeBuilders),
-                limit, offset);
+                limit, offset, getSelectList(selectAttributeBuilders));
     }
 
     private ApacheIgniteCompiledCondition compileSelectClause(List<SelectAttributeBuilder> selectAttributeBuilders) {
@@ -705,28 +653,27 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         }
         if (compiledSelectionList.length() > 0) {
-            compiledSelectionList.setLength(compiledSelectionList.length() - 1);//remove last comma
+            compiledSelectionList.setLength(compiledSelectionList.length() - 1); //remove last comma
         }
         return new ApacheIgniteCompiledCondition(compiledSelectionList.toString(), paramMap, paramConstMap,
                 false, 0);
     }
 
-
     //*****************
     private List<String> getSelectList(List<SelectAttributeBuilder> selectAttributeBuilders) {
 
-        List<String> attri=new ArrayList<>();
+        List<String> attri = new ArrayList<>();
         for (SelectAttributeBuilder selectAttributeBuilder : selectAttributeBuilders) {
             ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
             selectAttributeBuilder.getExpressionBuilder().build(visitor);
 
             String compiledCondition = visitor.returnCondition();
+            log.info(compiledCondition);
             attri.add(compiledCondition);
         }
         return attri;
     }
     //********************
-
 
     private ApacheIgniteCompiledCondition compileClause(List<ExpressionBuilder> expressionBuilders) {
 
@@ -871,6 +818,33 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         columns.delete(columns.length() - 2, columns.length());
         log.info(columns.toString());
         return columns.toString();
+    }
+
+    private String replaceConditionWithParameter(String condition,
+                                                Map<String, Object> conditionParameterMap
+            , Map<Integer, Object> constantMap) {
+
+        for (Map.Entry<String, Object> map : conditionParameterMap.entrySet()) {
+
+            Object streamVariable = map.getValue();
+            if (streamVariable instanceof String) {
+                condition = condition.replaceFirst(Pattern.quote("?"), map.getValue().toString());
+            } else {
+                condition = condition.replaceFirst(Pattern.quote("'?'"), map.getValue().toString());
+            }
+        }
+
+        for (Map.Entry<Integer, Object> map : constantMap.entrySet()) {
+
+            Object constant = map.getValue();
+            if (constant instanceof String) {
+                condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
+            } else {
+                condition = condition.replaceFirst(Pattern.quote("'*'"), map.getValue().toString());
+            }
+        }
+
+        return condition;
     }
 
     //convert record to comma separated string

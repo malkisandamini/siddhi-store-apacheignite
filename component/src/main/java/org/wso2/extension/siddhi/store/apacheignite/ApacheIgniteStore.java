@@ -23,7 +23,6 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.table.record.AbstractQueryableRecordTable;
 import org.wso2.siddhi.core.table.record.ExpressionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
@@ -50,24 +49,46 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.AFFINITY_KEY;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_PASSWORD;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_TABLE_NAME;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_URL;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_USERNAME;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ATOMICITY;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.AUTO_CLOSE_SERVER_CURSER;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.BACKUPS;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.BOOLEAN;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.CACHE_NAME;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.CLOSE_PARENTHESIS;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.COLLOCATED;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.COLUMNS;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.DATA_REGION;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.DISTRIBUTED_JOINS;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ENFORCE_JOIN_ORDER;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.EQUAL;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.FLOAT;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.INSERT_QUERY;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.LONG;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.OPEN_PARENTHESIS;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.REPLICATED_ONLY;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SCHEMA;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SEMI_COLON;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SEPARATOR;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SOCKET_RECEIVE_BUFFER;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SOCKET_SEND_BUFFER;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SQL_PRIMARY_KEY_DEF;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_CLIENT_CERTIFICATE_KEY_STORE_PASSWORD;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_CLIENT_CERTIFICATE_KEY_STORE_TYPE;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_CLIENT_CERTIFICATE_KEY_STORE_URL;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_MODE;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_TRUST_ALL;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_TRUST_CERTIFICATE_KEY_STORE_PASSWORD;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_TRUST_CERTIFICATE_KEY_STORE_URL;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.STRING;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.TABLE_CREATE_QUERY;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.TABLE_NAME;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.TEMPLATE;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.VALUES;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.WHITESPACE;
 import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_INDEX;
@@ -115,12 +136,32 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     private String url;
     private String username;
     private String password;
+    private String schema;
+    private String template;
+    private String distributeJoins;
+    private String enforceJoinOrder;
+    private String collocated;
+    private String replicatedOnly;
+    private String autocloseServerCursor;
+    private String socketSendBuffer;
+    private String socketReceiveBuffer;
+    private String sslMode;
+    private String sslClientCertificateKeyStoreUrl;
+    private String sslClientCertificateKeyStorePassword;
+    private String sslClientCertificateKeyStoreType;
+    private String sslTrustCertificateKeyStoreUrl;
+    private String sslTrustCertificateKeyStorePassword;
+    private String sslTrustAll;
+    private String backups;
+    private String atomicity;
+    private String affinityKey;
+    private String cacheName;
+    private String dataRegion;
     private String binaryType;
     private boolean connected;
     private Annotation storeAnnotation;
     private Annotation primaryKey;
     private Annotation indices;
-    private List<String> attributeNames;
     private List<Attribute> attributes;
     private List<Integer> primaryKeyAttributePositionList;
     private Connection con;
@@ -141,9 +182,31 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         username = storeAnnotation.getElement(ANNOTATION_ELEMENT_USERNAME);
         password = storeAnnotation.getElement(ANNOTATION_ELEMENT_PASSWORD);
         String tableName = storeAnnotation.getElement(ANNOTATION_ELEMENT_TABLE_NAME);
+        schema = storeAnnotation.getElement(SCHEMA);
+        backups = storeAnnotation.getElement(BACKUPS);
+        template = storeAnnotation.getElement(TEMPLATE);
+        distributeJoins = storeAnnotation.getElement(DISTRIBUTED_JOINS);
+        enforceJoinOrder = storeAnnotation.getElement(ENFORCE_JOIN_ORDER);
+        collocated = storeAnnotation.getElement(COLLOCATED);
+        replicatedOnly = storeAnnotation.getElement(REPLICATED_ONLY);
+        autocloseServerCursor = storeAnnotation.getElement(AUTO_CLOSE_SERVER_CURSER);
+        socketReceiveBuffer = storeAnnotation.getElement(SOCKET_RECEIVE_BUFFER);
+        socketSendBuffer = storeAnnotation.getElement(SOCKET_SEND_BUFFER);
+        sslMode = storeAnnotation.getElement(SSL_MODE);
+        sslClientCertificateKeyStoreUrl = storeAnnotation.getElement(SSL_CLIENT_CERTIFICATE_KEY_STORE_URL);
+        sslClientCertificateKeyStorePassword = storeAnnotation.getElement(SSL_CLIENT_CERTIFICATE_KEY_STORE_PASSWORD);
+        sslClientCertificateKeyStoreType = storeAnnotation.getElement(SSL_CLIENT_CERTIFICATE_KEY_STORE_TYPE);
+        sslTrustCertificateKeyStoreUrl = storeAnnotation.getElement(SSL_TRUST_CERTIFICATE_KEY_STORE_URL);
+        sslTrustCertificateKeyStorePassword = storeAnnotation.getElement(SSL_TRUST_CERTIFICATE_KEY_STORE_PASSWORD);
+        sslTrustAll = storeAnnotation.getElement(SSL_TRUST_ALL);
+        atomicity = storeAnnotation.getElement(ATOMICITY);
+        affinityKey = storeAnnotation.getElement(AFFINITY_KEY);
+        cacheName = storeAnnotation.getElement(CACHE_NAME);
+        dataRegion = storeAnnotation.getElement(DATA_REGION);
+
         attributes = tableDefinition.getAttributeList();
-        this.attributeNames = tableDefinition.getAttributeList().stream().map(Attribute::getName).
-                collect(Collectors.toList());
+//        this.attributeNames = tableDefinition.getAttributeList().stream().map(Attribute::getName).
+//                collect(Collectors.toList());
         this.tableName = ApacheIgniteTableUtils.isEmpty(tableName) ? tableDefinition.getId() : tableName;
         if (ApacheIgniteTableUtils.isEmpty(url)) {
             throw new SiddhiAppCreationException("Required parameter '" + ANNOTATION_ELEMENT_URL + " for DB " +
@@ -191,7 +254,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             }
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
-            throw new SiddhiAppRuntimeException("insertion failed " + e.getMessage());
+            throw new ApacheIgniteTableException("Error writing to table " + this.tableName + " : " + e.getMessage(),
+                    e);
         }
     }
 
@@ -233,7 +297,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         } catch (SQLException e) {
             // ApacheIgniteTableUtils.cleanupConnection(rs, st, con); bug
-            throw new ApacheIgniteTableException("unable to read " + this.tableName + e.getMessage());
+            throw new ApacheIgniteTableException("Error retrieving records from table  " + this.tableName + " : " +
+                    e.getMessage(), e);
         }
     }
 
@@ -278,7 +343,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(rs, st, con);
-            throw new ApacheIgniteTableException("unable to read " + this.tableName + e.getMessage());
+            throw new ApacheIgniteTableException("Error performing 'contains'  on the table : '" + this.tableName +
+                    "': " + e.getMessage(), e);
         }
         //return false;
     }
@@ -318,7 +384,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
-            throw new ApacheIgniteTableException("Error deleting recors from the table: " + this.tableName);
+            throw new ApacheIgniteTableException("Error deleting records from table '" + this.tableName + "': "
+                    + e.getMessage(), e);
         }
     }
 
@@ -357,12 +424,11 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             statement = con.prepareStatement(updateCondition.toString());
             statement.execute();
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
-            //do throw exception if key other than primary key defined with on condition.
-            //check with two primary keys.
             log.info(updateCondition);
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
-            throw new ApacheIgniteTableException("error updating records " + this.tableName);
+            throw new ApacheIgniteTableException("Error performing record update operations on table '" + this.tableName
+                    + "': " + e.getMessage(), e);
         }
     }
 
@@ -421,12 +487,10 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             log.info(updateCondition);
             PreparedStatement statement = con.prepareStatement(updateCondition.toString());
             statement.execute();
-            // statement.close();
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
-            //do throw exception if key other than primary key defined with on condition.
-            //check with two primary keys.
         } catch (SQLException e) {
-            throw new SiddhiAppRuntimeException("insertion or updating failed " + e.getMessage());
+            throw new ApacheIgniteTableException("Error in updating or inserting records to table '" + this.tableName
+                    + "': " + e.getMessage(), e);
         }
     }
 
@@ -440,11 +504,10 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     @Override
     protected CompiledCondition compileCondition(ExpressionBuilder expressionBuilder) {
 
-        ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+        ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor();
         expressionBuilder.build(visitor);
         return new ApacheIgniteCompiledCondition(visitor.returnCondition(), visitor.getParameters(),
-                visitor.getParametersConstant(),
-                visitor.isContainsConditionExist(), visitor.getOrdinalOfContainPattern());
+                visitor.getParametersConstant());
     }
 
     /**
@@ -471,15 +534,81 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     protected void connect() throws ConnectionUnavailableException {
 
         try {
-            Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
-            con = DriverManager.getConnection(url);
+            //Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
+            StringBuilder connectionParams = new StringBuilder();
+            connectionParams.append(url);
+            if (schema != null) {
+                connectionParams.append("/").append(schema);
+            }
+            if (username != null) {
+                connectionParams.append(SEMI_COLON).append("user").append(EQUAL).append(username);
+            }
+            if (password != null) {
+                connectionParams.append(SEMI_COLON).append("password").append(EQUAL).append(password);
+            }
+            if (collocated != null) {
+                connectionParams.append(SEMI_COLON).append("collocated").append(EQUAL).append(collocated);
+            }
+            if (distributeJoins != null) {
+                connectionParams.append(SEMI_COLON).append("distributeJoins").append(EQUAL).append(distributeJoins);
+            }
+            if (enforceJoinOrder != null) {
+                connectionParams.append(SEMI_COLON).append("enforceJoinOrder").append(EQUAL).append(enforceJoinOrder);
+            }
+            if (replicatedOnly != null) {
+                connectionParams.append(SEMI_COLON).append("replicatedOnly").append(EQUAL).append(replicatedOnly);
+            }
+            if (autocloseServerCursor != null) {
+                connectionParams.append(SEMI_COLON).append("autocloseServerCursor").append(EQUAL)
+                        .append(autocloseServerCursor);
+            }
+            if (replicatedOnly != null) {
+                connectionParams.append(SEMI_COLON).append("replicatedOnly").append(EQUAL).append(replicatedOnly);
+            }
+            if (socketSendBuffer != null) {
+                connectionParams.append(SEMI_COLON).append("socketSendBuffer").append(EQUAL).append(socketSendBuffer);
+            }
+            if (socketReceiveBuffer != null) {
+                connectionParams.append(SEMI_COLON).append("socketReceiveBuffer").append(EQUAL)
+                        .append(socketReceiveBuffer);
+            }
+            if (sslMode != null) {
+                connectionParams.append(SEMI_COLON).append("sslMode").append(EQUAL).append(sslMode);
+            }
+            if (sslClientCertificateKeyStoreUrl != null) {
+                connectionParams.append(SEMI_COLON).append("sslClientCertificateKeyStoreUrl").append(EQUAL)
+                        .append(sslClientCertificateKeyStoreUrl);
+            }
+            if (sslClientCertificateKeyStorePassword != null) {
+                connectionParams.append(SEMI_COLON).append("sslClientCertificateKeyStorePassword").append(EQUAL)
+                        .append(sslClientCertificateKeyStorePassword);
+            }
+            if (sslClientCertificateKeyStoreType != null) {
+                connectionParams.append(SEMI_COLON).append("sslClientCertificateKeyStoreType").append(EQUAL)
+                        .append(sslClientCertificateKeyStoreType);
+            }
+            if (sslTrustCertificateKeyStoreUrl != null) {
+                connectionParams.append(SEMI_COLON).append("sslTrustCertificateKeyStoreUrl").append(EQUAL)
+                        .append(sslTrustCertificateKeyStoreUrl);
+            }
+            if (sslTrustCertificateKeyStorePassword != null) {
+                connectionParams.append(SEMI_COLON).append("sslTrustCertificateKeyStorePassword").append(EQUAL)
+                        .append(sslTrustCertificateKeyStorePassword);
+            }
+            if (sslTrustAll != null) {
+                connectionParams.append(SEMI_COLON).append("sslTrustAll").append(EQUAL).append(sslTrustAll);
+            }
+
+            log.info(connectionParams);
+            con = DriverManager.getConnection(connectionParams.toString());
             this.createTable(storeAnnotation, primaryKey, indices);
             connected = true;
         } catch (SQLException e) {
             throw new ConnectionUnavailableException("unable to connect " + e.getMessage(), e);
-        } catch (ClassNotFoundException e) {
-            throw new ConnectionUnavailableException("unable to find class" + e.getMessage(), e);
         }
+//        } catch (ClassNotFoundException e) {
+//            throw new ConnectionUnavailableException("unable to find class" + e.getMessage(), e);
+//        }
     }
 
     /**
@@ -505,13 +634,13 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     @Override
     protected void destroy() {
 
-        try {
-            if (connected) {
-                con.close();
-            }
-        } catch (SQLException e) {
-            throw new ApacheIgniteTableException("unable to close connection");
-        }
+//        try {
+//            if (connected) {
+//                con.close();
+//            }
+//        } catch (SQLException e) {
+//            throw new ApacheIgniteTableException("unable to close connection");
+//        }
     }
 
     @Override
@@ -581,6 +710,11 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             String groupByClause = " group by " + compileGroupByClause.getCompiledQuery();
             selectQuery.append(WHITESPACE).append(groupByClause);
         }
+        ApacheIgniteCompiledCondition compileOrderByClause = apacheIgniteCompiledSelection.getCompiledOrderByClause();
+        if (compileOrderByClause != null) {
+            String orderByClause = " order by " + compileOrderByClause.getCompiledQuery();
+            selectQuery.append(WHITESPACE).append(orderByClause);
+        }
         if (apacheIgniteCompiledSelection.getLimit() != null) {
             selectQuery.append(" limit ").append(apacheIgniteCompiledSelection.getLimit());
         }
@@ -591,12 +725,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         if (compileHavingClause != null) {
             String havingClause = " having " + compileHavingClause.getCompiledQuery();
             selectQuery.append(WHITESPACE).append(havingClause);
-        }
-
-        ApacheIgniteCompiledCondition compileOrderByClause = apacheIgniteCompiledSelection.getCompiledOrderByClause();
-        if (compileOrderByClause != null) {
-            String orderByClause = " order by " + compileOrderByClause.getCompiledQuery();
-            selectQuery.append(WHITESPACE).append(orderByClause);
         }
 
         return selectQuery.toString();
@@ -628,7 +756,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         int offset = 0;
 
         for (SelectAttributeBuilder selectAttributeBuilder : selectAttributeBuilders) {
-            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor();
             selectAttributeBuilder.getExpressionBuilder().build(visitor);
 
             String compiledCondition = visitor.returnCondition();
@@ -655,16 +783,14 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         if (compiledSelectionList.length() > 0) {
             compiledSelectionList.setLength(compiledSelectionList.length() - 1); //remove last comma
         }
-        return new ApacheIgniteCompiledCondition(compiledSelectionList.toString(), paramMap, paramConstMap,
-                false, 0);
+        return new ApacheIgniteCompiledCondition(compiledSelectionList.toString(), paramMap, paramConstMap);
     }
 
-    //*****************
     private List<String> getSelectList(List<SelectAttributeBuilder> selectAttributeBuilders) {
 
         List<String> attri = new ArrayList<>();
         for (SelectAttributeBuilder selectAttributeBuilder : selectAttributeBuilders) {
-            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor();
             selectAttributeBuilder.getExpressionBuilder().build(visitor);
 
             String compiledCondition = visitor.returnCondition();
@@ -673,7 +799,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         }
         return attri;
     }
-    //********************
 
     private ApacheIgniteCompiledCondition compileClause(List<ExpressionBuilder> expressionBuilders) {
 
@@ -684,7 +809,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
         int offset = 0;
         for (ExpressionBuilder expressionBuilder : expressionBuilders) {
-            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor();
             expressionBuilder.build(visitor);
             String compiledCondition = visitor.returnCondition();
             compiledSelectionList.append(compiledCondition).append(SEPARATOR);
@@ -722,8 +847,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             }
         }
 
-        return new ApacheIgniteCompiledCondition(condition, paramMap, paramCons,
-                false, 0);
+        return new ApacheIgniteCompiledCondition(condition, paramMap, paramCons);
     }
 
     private ApacheIgniteCompiledCondition compileOrderByClause(List<OrderByAttributeBuilder> orderByAttributeBuilders) {
@@ -732,7 +856,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         SortedMap<Integer, Object> paramMap = new TreeMap<>();
         int offset = 0;
         for (OrderByAttributeBuilder orderByAttributeBuilder : orderByAttributeBuilders) {
-            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor(this.tableName);
+            ApacheIgniteConditionVisitor visitor = new ApacheIgniteConditionVisitor();
             orderByAttributeBuilder.getExpressionBuilder().build(visitor);
             String compiledCondition = visitor.returnCondition();
             compiledSelectionList.append(compiledCondition);
@@ -757,8 +881,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         if (compiledSelectionList.length() > 0) {
             compiledSelectionList.setLength(compiledSelectionList.length() - 1);
         }
-        return new ApacheIgniteCompiledCondition(compiledSelectionList.toString(), paramMap, null,
-                false, 0);
+        return new ApacheIgniteCompiledCondition(compiledSelectionList.toString(), paramMap, null);
     }
 
     public void createTable(Annotation store, Annotation primaryKey, Annotation indices) throws SQLException {
@@ -789,7 +912,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                     case OBJECT:
                         tableCreateQuery.append(binaryType);
                         break;
-                    case STRING://check in rdbms
+                    case STRING:
                         tableCreateQuery.append(STRING);
                         break;
                 }
@@ -799,10 +922,41 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                     append(this.flattenAnnotatedElements(primaryKeyList))
                     .append(CLOSE_PARENTHESIS);
             tableCreateQuery.append(CLOSE_PARENTHESIS);
+            tableCreateQuery.append(" WITH ").append("\"template").append(EQUAL);
+
+            //append(template);
+            if (template != null) {
+                tableCreateQuery.append(template).append("\"");
+            } else {
+                tableCreateQuery.append("PARTITIONED").append("\"");
+            }
+
+            if (backups != null) {
+                tableCreateQuery.append(SEPARATOR).append("\"").append("Backups").append(EQUAL).append(backups)
+                        .append("\"");
+            }
+            if (atomicity != null) {
+                tableCreateQuery.append(SEPARATOR).append("\"").append("Atomicity").append(EQUAL).append(atomicity)
+                        .append("\"");
+            }
+            if (affinityKey != null) {
+                tableCreateQuery.append(SEPARATOR).append("\"").append("Affinity_Key").append(EQUAL)
+                        .append(affinityKey).append("\"");
+            }
+            if (cacheName != null) {
+                tableCreateQuery.append(SEPARATOR).append("\"").append("Cache_name").append(EQUAL).append(cacheName)
+                        .append("\"");
+            }
+            if (dataRegion != null) {
+                tableCreateQuery.append(SEPARATOR).append("\"").append("Data_region").append(EQUAL).append(dataRegion)
+                        .append("\"");
+            }
+
+            log.info(tableCreateQuery);
             sts = con.prepareStatement(tableCreateQuery.toString());
             sts.execute();
             ApacheIgniteTableUtils.cleanupConnection(null, sts, con);
-            log.info(tableCreateQuery);
+
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, sts, con);
             throw new ApacheIgniteTableException("table creation failed " + e.getMessage(), e);
@@ -821,7 +975,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     }
 
     private String replaceConditionWithParameter(String condition,
-                                                Map<String, Object> conditionParameterMap
+                                                 Map<String, Object> conditionParameterMap
             , Map<Integer, Object> constantMap) {
 
         for (Map.Entry<String, Object> map : conditionParameterMap.entrySet()) {

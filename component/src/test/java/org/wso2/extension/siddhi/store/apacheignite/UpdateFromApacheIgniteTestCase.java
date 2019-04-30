@@ -42,13 +42,13 @@ public class UpdateFromApacheIgniteTestCase {
     @BeforeClass
     public static void startTest() {
 
-        log.info("test started");
+        log.info("== Apache Ignite Table UPDATE tests started ==");
     }
 
     @AfterClass
     public static void shutdown() {
 
-        log.info("test completed");
+        log.info("== Apache Ignite Table UPDATE tests completed ==");
     }
 
     @BeforeMethod
@@ -85,6 +85,44 @@ public class UpdateFromApacheIgniteTestCase {
                 "from UpdateStockStream " +
                 "update  StockTable " +
                 "on StockTable.symbol==symbol;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
+        updateStockStream.send(new Object[]{"GOOG", 1278.6F, 200L});
+        updateStockStream.send(new Object[]{"IB", 27.6F, 101L});
+        Thread.sleep(500);
+        int pointsInTable = 2;
+        Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Testing updating  ")
+    public void updateIntoTableTest2() throws InterruptedException {
+
+        log.info("UpdateIntoTableTest2");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update  StockTable " +
+                "on StockTable.volume==volume;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");

@@ -52,13 +52,13 @@ public class ContainsIn {
     @BeforeClass
     public static void startTest() {
 
-        log.info("test started");
+        log.info("== Apache Ignite Table Contains tests started ==");
     }
 
     @AfterClass
     public static void shutdown() {
 
-        log.info("test completed");
+        log.info("== Apache Ignite Table Contains tests completed ==");
     }
 
     @BeforeMethod
@@ -66,13 +66,15 @@ public class ContainsIn {
 
         try {
             ApacheIgniteTestUtils.dropTable(TABLE_NAME);
+            inEventCount = 0;
+            eventArrived = false;
 
         } catch (SQLException e) {
             log.info("Test case ignored due to " + e.getMessage());
         }
     }
 
-    @Test(description = "Testing contains in  ")
+    @Test(description = "Testing contains in with single condition ")
     public void containsInTableTest() throws InterruptedException {
 
         log.info("containsInTableTest");
@@ -92,11 +94,10 @@ public class ContainsIn {
                 "insert into StockTable;\n" +
                 "@info(name = 'query2')\n " +
                 "from FooStream \n" +
-                "[(StockTable.volume ==value ) in StockTable]\n" +
+                "[(StockTable.symbol ==name ) in StockTable]\n" +
                 "insert into OutputStream;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-        // InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
@@ -109,10 +110,10 @@ public class ContainsIn {
                     for (Event event : events) {
                         switch (inEventCount) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WS", 100}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 100}, event.getData());
                                 break;
                             case 2:
-                                Assert.assertEquals(new Object[]{"IB", 10}, event.getData());
+                                Assert.assertEquals(new Object[]{"IBM", 10}, event.getData());
                                 break;
                         }
                     }
@@ -122,24 +123,20 @@ public class ContainsIn {
             }
         });
         siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WS", 325.6f, 100L});
-        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 325.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
         stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
 
-        Thread.sleep(500);
-        int pointsInTable = 2;
-
-        fooStream.send(new Object[]{"WS", 100});
-        fooStream.send(new Object[]{"IB", 10});
+        fooStream.send(new Object[]{"WSO2", 100});
+        fooStream.send(new Object[]{"IBM", 10});
         fooStream.send(new Object[]{"WSO22", 100});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(inEventCount, 2, "Number of success events");
         Assert.assertEquals(eventArrived, true, "success");
-        Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Testing contains in  ")
+    @Test(description = "Testing contains in with two conditions ")
     public void containsInWithTwoConditionsTableTest() throws InterruptedException {
 
         log.info("containsInWithTwoConditionsTableTest");
@@ -163,7 +160,6 @@ public class ContainsIn {
                 "insert into OutputStream;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-        // InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.addCallback("query2", new QueryCallback() {
             @Override
@@ -190,20 +186,78 @@ public class ContainsIn {
         });
         siddhiAppRuntime.start();
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
-        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 10L});
         stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
-
-        Thread.sleep(500);
-        int pointsInTable = 2;
 
         fooStream.send(new Object[]{"WS", 100});
         fooStream.send(new Object[]{"IB", 10});
         fooStream.send(new Object[]{"WSO22", 100});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-        Assert.assertEquals(inEventCount, 1, "Number of success events");
+        Assert.assertEquals(inEventCount, 2, "Number of success events");
         Assert.assertEquals(eventArrived, true, "success");
-        Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
         siddhiAppRuntime.shutdown();
     }
 
+    @Test(description = "Testing with already defined outputstream.")
+    public void containsCheckTestWithDefinedStream() throws InterruptedException, SQLException {
+
+        log.info("containsCheckTestWithDefinedStream");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream FooStream (name string,value long);\n" +
+                "@sink(type='log')" +
+                "define stream OutputStream (name string,value long);" +
+                "define stream StockStream (symbol string, price float, volume long);\n" +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1')\n" +
+                "from StockStream\n" +
+                "select *\n" +
+                "insert into StockTable;\n" +
+                "@info(name = 'query2')\n " +
+                "from FooStream \n" +
+                "[(StockTable.symbol ==name ) in StockTable]\n" +
+                "insert into OutputStream;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long l, Event[] events, Event[] events1) {
+
+                EventPrinter.print(l, events, events1);
+                if (events != null) {
+                    eventArrived = true;
+                    inEventCount++;
+                    for (Event event : events) {
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"WSO2", 100}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"IBM", 10}, event.getData());
+                                break;
+                        }
+                    }
+                } else {
+                    eventArrived = false;
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 65.6f, 10L});
+        stockStream.send(new Object[]{"CSC", 65.6f, 10L});
+        fooStream.send(new Object[]{"WSO2", 100});
+        fooStream.send(new Object[]{"IBM", 10});
+        fooStream.send(new Object[]{"WSO22", 100});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        Assert.assertEquals(inEventCount, 2, "Number of success events");
+        Assert.assertEquals(eventArrived, true, "success");
+        siddhiAppRuntime.shutdown();
+    }
 }

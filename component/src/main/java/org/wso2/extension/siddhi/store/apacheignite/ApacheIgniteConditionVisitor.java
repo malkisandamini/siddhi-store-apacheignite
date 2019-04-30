@@ -17,7 +17,6 @@
  */
 package org.wso2.extension.siddhi.store.apacheignite;
 
-import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.table.record.BaseExpressionVisitor;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
@@ -29,7 +28,7 @@ import java.util.TreeMap;
 
 /**
  * Class which is used by the Siddhi runtime for instructions on converting the SiddhiQL condition to the condition
- * format understood by the Apache ignite
+ * format understood by the Apache ignite store.
  */
 public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
 
@@ -40,16 +39,11 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     private Map<String, Object> placeholdersConstant;
     private SortedMap<Integer, Object> parameters;
     private SortedMap<Integer, Object> parametersConstant;
-
     private int streamVarCount;
     private int constantCount;
 
-    private boolean isContainsConditionExist;
-    private int ordinalOfContainPattern = 1;
+    public ApacheIgniteConditionVisitor() {
 
-    public ApacheIgniteConditionVisitor(String tableName) {
-
-      //  this.tableName = tableName;
         this.condition = new StringBuilder();
         this.streamVarCount = 0;
         this.constantCount = 0;
@@ -59,19 +53,10 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         this.parametersConstant = new TreeMap<>();
     }
 
-    public ApacheIgniteConditionVisitor() {
-        //preventing initialization
-    }
-
     public String returnCondition() {
 
         this.parametrizeCondition();
         return this.finalCompiledCondition.trim();
-    }
-
-    public int getOrdinalOfContainPattern() {
-
-        return ordinalOfContainPattern;
     }
 
     public SortedMap<Integer, Object> getParameters() {
@@ -82,11 +67,6 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     public SortedMap<Integer, Object> getParametersConstant() {
 
         return this.parametersConstant;
-    }
-
-    public boolean isContainsConditionExist() {
-
-        return isContainsConditionExist;
     }
 
     @Override
@@ -244,16 +224,6 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitConstant(Object value, Attribute.Type type) {
 
-//        String name;
-//        if (nextProcessContainsPattern) {
-//            name = this.generatePatternConstantName();
-//            nextProcessContainsPattern = false;
-//        } else {
-//            name = this.generateConstantName();
-//        }
-//        this.placeholders.put(name, new Constant(value, type));
-//        condition.append("[").append(name).append("]").append(ApacheIgniteConstants.WHITESPACE);
-
         String name = this.generateConstantName();
         this.placeholdersConstant.put(name, value);
         condition.append("[").append(name).append("]").append(ApacheIgniteConstants.WHITESPACE);
@@ -317,29 +287,11 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitAttributeFunction(String namespace, String functionName) {
 
-        if (ApacheIgniteTableUtils.isEmpty(namespace)) {
-            condition.append(functionName).append(ApacheIgniteConstants.OPEN_PARENTHESIS);
-        } else if ((namespace.trim().equals("str") && functionName.equals("contains"))) {
-            condition.append("CONTAINS").append(ApacheIgniteConstants.OPEN_PARENTHESIS);
-            isContainsConditionExist = true;
-           // nextProcessContainsPattern = true;
-        } else {
-            throw new OperationNotSupportedException("The  Event table does not support function namespaces, " +
-                    "but namespace '" + namespace + "' was specified. Please use functions supported by the " +
-                    "defined * data store.");
-        }
     }
 
     @Override
     public void endVisitAttributeFunction(String namespace, String functionName) {
 
-        if (ApacheIgniteTableUtils.isEmpty(namespace) || isContainsConditionExist) {
-            condition.append(ApacheIgniteConstants.CLOSE_PARENTHESIS).append(ApacheIgniteConstants.WHITESPACE);
-        } else {
-            throw new OperationNotSupportedException("The  Event table does not support function namespaces, " +
-                    "but namespace '" + namespace + "' was specified. Please use functions supported by the " +
-                    "defined * data store.");
-        }
     }
 
     @Override

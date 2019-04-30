@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * contains methods required for implementation
+ * Class which holds the utility methods which are used by Apache Ignite store implementation.
  */
 public class ApacheIgniteTableUtils {
 
@@ -67,18 +67,6 @@ public class ApacheIgniteTableUtils {
                 }
             }
         }
-//        if (conn != null) {
-//            try {
-//                conn.close();
-//                if (log.isDebugEnabled()) {
-//                    log.debug("Closed Connection");
-//                }
-//            } catch (SQLException e) {
-//                if (log.isDebugEnabled()) {
-//                    log.debug("Error closing Connection: " + e.getMessage(), e);
-//                }
-//            }
-//        }
     }
 
 }

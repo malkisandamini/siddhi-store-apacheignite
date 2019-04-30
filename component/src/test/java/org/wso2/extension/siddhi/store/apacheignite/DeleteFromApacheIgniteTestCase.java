@@ -62,8 +62,8 @@ public class DeleteFromApacheIgniteTestCase {
         }
     }
 
-    @Test(description = "Testing deletion ")
-    public void deleteFromTableTest() throws InterruptedException,SQLException {
+    @Test(description = "Testing deletion by using primary key in on condition")
+    public void deleteFromTableTest() throws InterruptedException, SQLException {
 
         log.info("deleteFromTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -99,8 +99,8 @@ public class DeleteFromApacheIgniteTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Testing deletion ")
-    public void deleteFromTableTest2() throws InterruptedException,SQLException {
+    @Test(description = "Testing deletion using constant ")
+    public void deleteFromTableTest2() throws InterruptedException, SQLException {
 
         log.info("deleteFromTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -138,7 +138,7 @@ public class DeleteFromApacheIgniteTestCase {
     }
 
     @Test(description = "Testing deletion with out using primary keys")
-    public void deleteFromTableWithNonPrimaryKeysTest() throws InterruptedException,SQLException {
+    public void deleteFromTableWithNonPrimaryKeysTest() throws InterruptedException, SQLException {
 
         log.info("deleteFromTableWithNonPrimaryKeysTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -171,6 +171,81 @@ public class DeleteFromApacheIgniteTestCase {
         Thread.sleep(500);
         int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
         Assert.assertEquals(rowsInTable, 1, "Deletion failed");
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Testing deletion using constant ")
+    public void deleteFromTableTest4() throws InterruptedException, SQLException {
+
+        log.info("deleteFromTableTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete StockTable " +
+                "   on 'WSO2' == StockTable.symbol  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 325.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"CSC", 85.6f, 200L});
+        deleteStockStream.send(new Object[]{"WSO2"});
+        deleteStockStream.send(new Object[]{"IBM"});
+        Thread.sleep(500);
+
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 2, "Deletion failed");
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Testing deletion by using multiple conditions")
+    public void deleteFromTableTest5() throws InterruptedException, SQLException {
+
+        log.info("deleteFromTableTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string,price float); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete StockTable " +
+                "   on StockTable.symbol == symbol and StockTable.price>price ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 325.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"CSC", 85.6f, 200L});
+        deleteStockStream.send(new Object[]{"WSO2", 315.6f});
+        deleteStockStream.send(new Object[]{"IBM", 325.6f});
+        Thread.sleep(500);
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 2, "Deletion failed");
         siddhiAppRuntime.shutdown();
     }
 }

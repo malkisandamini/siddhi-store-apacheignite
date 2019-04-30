@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 
 import java.sql.SQLException;
 
@@ -42,13 +43,13 @@ public class UpdateorInsertIntoApacheIgnite {
     @BeforeClass
     public static void startTest() {
 
-        log.info("test started");
+        log.info("== Apache Ignite Table UPDATE/INSERT tests started ==");
     }
 
     @AfterClass
     public static void shutdown() {
 
-        log.info("test completed");
+        log.info("== Apache Ignite Table UPDATE/INSERT tests completed ==");
     }
 
     @BeforeMethod
@@ -62,8 +63,8 @@ public class UpdateorInsertIntoApacheIgnite {
         }
     }
 
-    @Test(description = "Testing updating or inserting ")
-    public void updateOrInsertIntoTableTest() throws InterruptedException {
+    @Test(description = "Testing updating or inserting with stream variable")
+    public void updateOrInsertIntoTableTest() throws InterruptedException, SQLException {
 
         log.info("UpdateORInsertIntoTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -95,9 +96,121 @@ public class UpdateorInsertIntoApacheIgnite {
         updateStockStream.send(new Object[]{"GOOG", 1278.6F, 200L});
         updateStockStream.send(new Object[]{"IB", 27.6F, 101L});
         Thread.sleep(500);
-        int pointsInTable = 2;
-        Assert.assertEquals(pointsInTable, 2, "Definition/Insertion failed");
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 3, "Insertion/Updating failed");
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(description = "Testing updating or inserting with constants")
+    public void updateOrInsertIntoTableTest2() throws InterruptedException, SQLException {
+
+        log.info("UpdateORInsertIntoTableTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update or insert into StockTable " +
+                "on StockTable.symbol=='WS';";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        updateStockStream.send(new Object[]{"GOOG", 12.6F, 100L});
+        updateStockStream.send(new Object[]{"GOOG", 1278.6F, 200L});
+        updateStockStream.send(new Object[]{"IB", 27.6F, 101L});
+        Thread.sleep(500);
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 3, "Insertion/Updating failed");
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Testing updating or inserting with non primary key attributes ")
+    public void updateOrInsertIntoTableTest3() throws InterruptedException, SQLException {
+
+        log.info("UpdateORInsertIntoTableTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update or insert into StockTable " +
+                "on StockTable.volume==volume;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        updateStockStream.send(new Object[]{"GOOG", 12.6F, 100L});
+        updateStockStream.send(new Object[]{"GOOG", 1278.6F, 200L});
+        updateStockStream.send(new Object[]{"IB", 27.6F, 101L});
+        Thread.sleep(500);
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 3, "Insertion/Updating failed");
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Testing updating or inserting with duplicate stream definitions ",
+            expectedExceptions = DuplicateDefinitionException.class)
+    public void updateOrInsertIntoTableTest4() throws InterruptedException, SQLException {
+
+        log.info("UpdateORInsertIntoTableTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update or insert into StockTable " +
+                "on StockTable.symbol==symbol;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        updateStockStream.send(new Object[]{"GOOG", 12.6F});
+        updateStockStream.send(new Object[]{"GOOG", 1278.6F});
+        siddhiAppRuntime.shutdown();
+    }
+
 }
 

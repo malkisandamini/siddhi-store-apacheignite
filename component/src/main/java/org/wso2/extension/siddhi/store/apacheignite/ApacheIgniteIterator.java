@@ -17,8 +17,6 @@
  */
 package org.wso2.extension.siddhi.store.apacheignite;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.table.record.RecordIterator;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -31,29 +29,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * class representing record iterator
+ * A class representing RecordIterator which is responsible for processing apache Ignite store find() operation in a
+ * streaming fashion.
  */
 public class ApacheIgniteIterator implements RecordIterator<Object[]> {
 
-    private static final Log log = LogFactory.getLog(ApacheIgniteIterator.class);
-    //    private Connection connection;
-//    private PreparedStatement statement;
+    private Connection connection;
+    private PreparedStatement statement;
     private ResultSet resultSet;
     private String tableName;
 
     private List<Attribute> attributes;
-    private List<String> attri;
-    private boolean preFetched;
-    private Object[] nextValue;
+    private List<String> attributeNames;
 
     public ApacheIgniteIterator(Connection con, PreparedStatement statement, ResultSet rs, String tableName,
-                                List<String> attri, List<Attribute> attributes) {
+                                List<String> attributeNames, List<Attribute> attributes) {
 
-//        this.connection = con;
-//        this.statement = statement;
+        this.connection = con;
+        this.statement = statement;
         this.resultSet = rs;
         this.tableName = tableName;
-        this.attri = attri;
+        this.attributeNames = attributeNames;
         this.attributes = attributes;
     }
 
@@ -77,14 +73,13 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
             throw new ApacheIgniteTableException("Error retrieving records from table '" + this.tableName + "': "
                     + e.getMessage(), e);
         }
-        // return null;
     }
 
     public Object[] extractRecord(ResultSet rs) throws SQLException {
 
         List<Object> result = new ArrayList<>();
         for (Attribute attribute : attributes) {
-            for (String att : attri) {
+            for (String att : attributeNames) {
                 if (attribute.getName().equalsIgnoreCase(att)) {
                     switch (attribute.getType()) {
                         case BOOL:
@@ -119,6 +114,10 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
     @Override
     public void close() throws IOException {
 
+        ApacheIgniteTableUtils.cleanupConnection(this.resultSet, this.statement, this.connection);
+        this.resultSet = null;
+        this.statement = null;
+        this.connection = null;
     }
 
 }

@@ -22,7 +22,8 @@ import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
 import java.util.List;
 
 /**
- * Implementation of class corresponding to Apache Ignite store
+ * Implementation of class corresponding to Apache Ignite store.
+ * Maintains the compiled select,group by, having, order by, limit clauses.
  */
 public class ApacheIgniteCompiledSelection implements CompiledSelection {
 

@@ -61,8 +61,9 @@ public class InsertIntoApacheIgniteTable {
             log.info("Test case ignored due to " + e.getMessage());
         }
     }
+
     @Test(description = "Testing insertion with single primary key ")
-    public void insertIntoTableWithSinglePrimaryKeyTest() throws InterruptedException,SQLException {
+    public void insertIntoTableWithSinglePrimaryKeyTest() throws InterruptedException, SQLException {
 
         log.info("insertIntoTableWithSinglePrimaryKeyTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -88,8 +89,37 @@ public class InsertIntoApacheIgniteTable {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test(description = "Testing insertion with duplicate primary key ")
+    public void insertIntoTableWithDuplicatePrimaryKeyTest() throws InterruptedException, SQLException {
+
+        log.info("insertIntoTableWithDuplicatePrimaryKeyTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "insert into StockTable ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        stockStream.send(new Object[]{"WS", 25.6f, 100L});
+
+        Thread.sleep(500);
+        //int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+
+        siddhiAppRuntime.shutdown();
+    }
+
     @Test(description = "Testing insertion with two primary keys ")
-    public void insertIntoTableWithTwoPrimaryKeysTest() throws InterruptedException,SQLException {
+    public void insertIntoTableWithTwoPrimaryKeysTest() throws InterruptedException, SQLException {
 
         log.info("insertIntoTableWithTwoPrimaryKeysTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -115,8 +145,9 @@ public class InsertIntoApacheIgniteTable {
         Assert.assertEquals(rowsInTable, 2, "Insertion failed");
         siddhiAppRuntime.shutdown();
     }
+
     @Test(description = "Testing insertion with specific fields ")
-    public void insertIntoTableWithSpecificFields() throws InterruptedException,SQLException {
+    public void insertIntoTableWithSpecificFields() throws InterruptedException, SQLException {
 
         log.info("insertIntoTableWithSpecificFieldsTest");
         SiddhiManager siddhiManager = new SiddhiManager();

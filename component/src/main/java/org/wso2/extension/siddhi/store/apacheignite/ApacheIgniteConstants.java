@@ -17,10 +17,8 @@
  */
 package org.wso2.extension.siddhi.store.apacheignite;
 
-import org.omg.CORBA.PUBLIC_MEMBER;
-
 /**
- * Class which holds constants required by Apache Ignite store implementation
+ * Class which holds constants required by Apache Ignite store implementation.
  */
 public class ApacheIgniteConstants {
 
@@ -29,7 +27,6 @@ public class ApacheIgniteConstants {
     public static final String ANNOTATION_ELEMENT_USERNAME = "username";
     public static final String ANNOTATION_ELEMENT_PASSWORD = "password";
 
-    public static final String HOST_AND_PORT_RANGE = "hostAndPortRange";
     public static final String SCHEMA = "schema";
     public static final String TEMPLATE = "template";
     public static final String DISTRIBUTED_JOINS = "distributedJoins";
@@ -75,6 +72,8 @@ public class ApacheIgniteConstants {
     public static final String CLOSE_PARENTHESIS = ")";
     public static final String WHITESPACE = " ";
     public static final String SEPARATOR = ",";
+    public static final String SEMI_COLON = ";";
+    public static final String EQUAL = "=";
 
     public static final String BOOLEAN = "boolean ";
     public static final String STRING = " varchar";
@@ -82,12 +81,9 @@ public class ApacheIgniteConstants {
     public static final String FLOAT = "float";
 
     public static final String INSERT_QUERY = "insert into {{tableName}} ({{columns}}) values ({{values}})";
-    public static final String INSERTS_QUERY = "insert into {{tableName}} ({{columns}}) values ({{value}})";
-    public static final String CONDITION = "{{condition}}";
     public static final String COLUMNS = "{{columns}}";
     public static final String VALUES = "{{values}}";
     public static final String TABLE_NAME = "{{tableName}}";
-
     public static final String TABLE_CREATE_QUERY = "CREATE TABLE IF NOT EXISTS  ";
 
 }

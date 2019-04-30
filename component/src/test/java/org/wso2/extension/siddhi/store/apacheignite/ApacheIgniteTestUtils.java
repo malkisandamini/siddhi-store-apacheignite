@@ -28,7 +28,7 @@ import java.sql.SQLException;
 
 public class ApacheIgniteTestUtils {
 
-    public static final String URL = "jdbc:ignite:thin://127.0.0.1/";
+    public static final String URL = "jdbc:ignite:thin://127.0.0.1";
     public static final String PASSWORD = "ignite";
     public static final String USERNAME = "ignite";
     public static final String TABLE_NAME = "stocktable";
@@ -39,7 +39,7 @@ public class ApacheIgniteTestUtils {
 
     }
 
-    public static void dropTable(String tableName) throws SQLException{
+    public static void dropTable(String tableName) throws SQLException {
 
         try {
             Connection con = DriverManager.getConnection(URL);
@@ -53,10 +53,10 @@ public class ApacheIgniteTestUtils {
 
     public static int getRowsInTable(String tableName) throws SQLException {
 
-        PreparedStatement statement = null;
-        Connection con = null;
+        PreparedStatement statement;
+        Connection con;
         try {
-             con = DriverManager.getConnection(URL);
+            con = DriverManager.getConnection(URL);
             statement = con.prepareStatement("SELECT count(*) FROM " + tableName);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -68,9 +68,5 @@ public class ApacheIgniteTestUtils {
             log.error("Getting rows in table " + tableName + " failed due to " + e.getMessage(), e);
             throw e;
         }
-//        finally {
-//            ApacheIgniteTableUtils.cleanupConnection(null,statement,con);
-//        }
-
     }
 }

@@ -20,7 +20,7 @@ package org.wso2.extension.siddhi.store.apacheignite;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 
 /**
- * class containing exceptions
+ * Represents an unchecked exception which may be thrown during runtime.
  */
 public class ApacheIgniteTableException extends SiddhiAppRuntimeException {
 
@@ -34,8 +34,4 @@ public class ApacheIgniteTableException extends SiddhiAppRuntimeException {
         super(message, throwable);
     }
 
-    public ApacheIgniteTableException(Throwable throwable) {
-
-        super(throwable);
-    }
 }

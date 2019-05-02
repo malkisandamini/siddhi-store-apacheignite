@@ -70,7 +70,7 @@ public class DefineTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," + "auth.enabled=\"false\"," +
                 "username=\"" + USERNAME + "\", password=\"" + PASSWORD
                 + "\",backups=" + "\"2\")\n" +
                 "@PrimaryKey(\"symbol\")" +
@@ -139,7 +139,7 @@ public class DefineTableTestCase {
             expectedExceptions = SiddhiAppCreationException.class)
     public void createTableWithoutUrlFieldTest() throws InterruptedException, SQLException {
 
-        log.info("createTableWithSinglePrimaryKeyTest");
+        log.info("createTableWithoutUrlField");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -182,15 +182,34 @@ public class DefineTableTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Testing table creation without defining value for username field ")
+    @Test(description = "Testing table creation without defining value for username field ",
+            expectedExceptions = SiddhiAppCreationException.class)
     public void createTableWithoutDefineUsernameTest() throws InterruptedException, SQLException {
 
-        log.info("createTableWithSinglePrimaryKeyTest");
+        log.info("createTableWithoutDefineUsernameTest");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," + "auth.enabled=\"true\"," +
                 "username=\"" + "\", password=\"" + PASSWORD
+                + "\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        Thread.sleep(100);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Testing table creation with incorrect username field ")
+    public void createTableWithIncorrectUsernameTest() throws InterruptedException, SQLException {
+
+        log.info("createTableWithIncorrectUsernameTest");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," + "auth.enabled=\"true\"," +
+                "username=\"" + "ignit" + "\", password=\"" + PASSWORD
                 + "\")\n" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -203,7 +222,8 @@ public class DefineTableTestCase {
     @Test(description = "Testing table creation with table.name ")
     public void createTableTest() throws InterruptedException, SQLException {
 
-        log.info("createTableWithSinglePrimaryKeyTest");
+        ApacheIgniteTestUtils.dropTable("FooTable");
+        log.info("createTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -225,10 +245,10 @@ public class DefineTableTestCase {
         int rowsInTable = ApacheIgniteTestUtils.getRowsInTable("FooTable");
         Assert.assertEquals(rowsInTable, 2, "Insertion failed");
         siddhiAppRuntime.shutdown();
-        ApacheIgniteTestUtils.dropTable("FooTable");
+
     }
 
-    @Test(description = "Testing table creation with different parameters ")
+    @Test(description = "Testing table creation with different parameters for table creation")
     public void createTableWithParametersTest1() throws InterruptedException, SQLException {
 
         log.info("createTableWithParametersTest1");
@@ -254,5 +274,35 @@ public class DefineTableTestCase {
         int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
         Assert.assertEquals(rowsInTable, 2, "Insertion failed");
         siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test(description = "Testing table creation with different parameters with connection url")
+    public void createTableWithParametersTest2() throws InterruptedException, SQLException {
+
+        log.info("createTableWithParametersTest1");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"apacheignite\", url = \"" + URL + "\" ," +
+                "username=\"" + USERNAME + "\", password=\"" + PASSWORD
+                + "\",socketSendBuffer=\"10\",socketRecieveBuffer= \"10\",replicatedOnly= \"true\"," +
+                "affinityKey= \"symbol\" ,cacheName= \"stockTable\")\n" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "insert into StockTable ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"IB", 75.6f, 100L});
+        Thread.sleep(500);
+        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
+        Assert.assertEquals(rowsInTable, 2, "Insertion failed");
+        siddhiAppRuntime.shutdown();
+
     }
 }

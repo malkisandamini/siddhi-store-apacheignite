@@ -21,6 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.Parameter;
+import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.table.record.AbstractQueryableRecordTable;
@@ -51,6 +53,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.AFFINITY_KEY;
+import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_AUTH_ENABLED;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_PASSWORD;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_TABLE_NAME;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.ANNOTATION_ELEMENT_URL;
@@ -96,12 +99,13 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_PRIMARY_KEY;
 import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 
 /**
- * apacheIgnite store implementation
+ * Class representing apacheIgnite store implementation.
  */
 @Extension(
         name = "apacheignite",
         namespace = "store",
-        description = " ",
+        description = "This extension connects to apache Ignite store." +
+                "It also implements read-write operations on connected apache ignite data store.",
         parameters = {
                /* @Parameter(
                         name = " ",
@@ -110,6 +114,177 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         optional = true/false, defaultValue = " ",
                         type = {DataType.INT, DataType.BOOL, DataType.STRING, DataType.DOUBLE, }
                         ),*/
+                @Parameter(
+                        name = "auth.enabled",
+                        description = "Describes whether authentication is enabled or not ",
+                        optional = true,
+                        defaultValue = "false",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "username",
+                        description = "username for SQL connection.Mandatory parameter if the authentication" +
+                                " is enabled on the server ",
+                        optional = true,
+                        defaultValue = "ignite ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "password",
+                        description = "password for SQL connection.Mandatory parameter if the authentication " +
+                                "is enabled on the server. ",
+                        optional = true, defaultValue = "ignite",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "schema",
+                        description = "Schema name to access ",
+                        optional = true,
+                        defaultValue = "Public ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "template",
+                        description = " name of a cache template registered in Ignite to use as a configuration " +
+                                "for the distributed cache ",
+                        optional = true,
+                        defaultValue = "partitioned ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "distributejoins",
+                        description = "Whether to use distributed joins for non collocated data or not. ",
+                        optional = true,
+                        defaultValue = "false",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "enforcejoinorder",
+                        description = "Whether to enforce join order of tables in the query or not. If set to true" +
+                                " query optimizer will not reorder tables in join. ",
+                        optional = true,
+                        defaultValue = "false ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "collocated",
+                        description = "Whether your data is co-located or not ",
+                        optional = true,
+                        defaultValue = "false ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "replicatedonly",
+                        description = "Whether query contains only replicated tables or not ",
+                        optional = true,
+                        defaultValue = "false ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "auto.close.server.cursor",
+                        description = "Whether to close server-side cursor automatically when last piece of " +
+                                "result set is retrieved or not. ",
+                        optional = true,
+                        defaultValue = "false",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "socket.send.buffer",
+                        description = "Socket send buffer size.When set to 0, OS default will be used. ",
+                        optional = true, defaultValue = "0 ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "socket.receive.buffer",
+                        description = "Socket receive buffer size.When set to 0, OS default will be used. ",
+                        optional = true,
+                        defaultValue = " 0",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "ssl.mode",
+                        description = "Enables SSL connection ",
+                        optional = true,
+                        defaultValue = "disable ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "ssl.client.certificate.key.store.url",
+                        description = "URL of the client key store file. ",
+                        optional = true,
+                        defaultValue = "The value of the javax.net.ssl.keyStore system property ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "ssl.client.certificate.key.store.password",
+                        description = "Client key store password. ",
+                        optional = true,
+                        defaultValue = "The value of the javax.net.ssl.keyStorePassword system property. ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "ssl.client.certificate.key.store.type",
+                        description = "Client key store type used in context initialization. ",
+                        optional = true,
+                        defaultValue = "JKS",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "ssl.trust.certificate.key.store.url",
+                        description = "URL of the trust store file ",
+                        optional = true,
+                        defaultValue = "The value of the javax.net.ssl.trustStore system property. ",
+                        type = {DataType.INT, DataType.BOOL, DataType.STRING, DataType.DOUBLE}
+                ),
+                @Parameter(
+                        name = "ssl.trust.certificate.key.store.password",
+                        description = "Trust store password. ",
+                        optional = true,
+                        defaultValue = " The value of the javax.net.ssl.trustStorePassword system property. ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "ssl.trust.all",
+                        description = "Disables server's certificate validation.",
+                        optional = true,
+                        defaultValue = "false ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "backups",
+                        description = "Number of backup copies of data.",
+                        optional = true,
+                        defaultValue = "0",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "atomicity",
+                        description = "Sets atomicity mode for the cache. ",
+                        optional = true,
+                        defaultValue = "atomic ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "affinity.key",
+                        description = "specifies an affinity key name which is a column of the primary key constraint.",
+                        optional = true,
+                        defaultValue = " column of the primary key constraint. ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "cache.name",
+                        description = "Name of the cache created. ",
+                        optional = true,
+                        defaultValue = " custom name of the new cache. ",
+                        type = {DataType.STRING}
+                ),
+                @Parameter(
+                        name = "data.region",
+                        description = "Name of the data region where table entries should be stored. ",
+                        optional = true,
+                        defaultValue = "an existing data region name ",
+                        type = {DataType.STRING}
+                ),
         },
         systemParameter = {
                /*@SystemParameter(
@@ -121,13 +296,42 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 
         examples = {
                 @Example(
-                        syntax = " ",
-                        description = " "
+                        syntax = "define stream StockStream (symbol string, price float, volume long);\n " +
+                                "@Store(type=\"apacheignite\", url = \" jdbc:ignite:thin://127.0.0.1 \" ," +
+                                ",auth.enabled = \"true\",username=\"ignite \", password=\" ignite ) \n" +
+                                "@PrimaryKey(\"symbol\")\n" +
+                                "define table StockTable (symbol string, price float, volume long);\n" +
+                                "@info(name = 'query1') \n" +
+                                "from StockStream\n" +
+                                "insert into StockTable ; ",
+                        description = "The above example creates a table in apache ignite data store if it does not " +
+                                "exists already with 'symbol' as the primary key.The connection is made as specified" +
+                                "by the parameters configured under '@Store' annotation.Data is inserted into table," +
+                                "stockTable from stockStream"
+                ),
+                @Example(
+                        syntax = "define stream StockStream (symbol string, price float, volume long);\n " +
+                                "@Store(type=\"apacheignite\", url = \" jdbc:ignite:thin://127.0.0.1 \" ," +
+                                "username=\"ignite \", password=\" ignite ) \n" +
+                                "@PrimaryKey(\"symbol\")\n" +
+                                "define table StockTable (symbol string, price float, volume long);\n" +
+                                "@info(name = 'query2')\n " +
+                                "from FooStream#window.length(1) join StockTable on " +
+                                "StockTable.symbol==FooStream.name \n" +
+                                "select StockTable.symbol as checkName, " +
+                                "StockTable.volume as checkVolume," +
+                                "StockTable.price as checkCategory\n " +
+                                "insert into OutputStream;",
+                        description = "The above example creates a table in apache ignite data store if it does not " +
+                                "exists already with 'symbol' as the primary key.The connection is made as specified" +
+                                "by the parameters configured under '@Store' annotation.Then the table is joined with" +
+                                " a stream name 'FooStream' based on a condition. The following operations are " +
+                                "included in the condition:\n" +
+                                "[AND, OR, Comparisons(<, <=, >, >=, ==, != )]"
+
                 )
         }
 )
-
-// for more information refer https://wso2.github.io/siddhi/documentation/siddhi-4.0/#event-table-types
 
 public class ApacheIgniteStore extends AbstractQueryableRecordTable {
 
@@ -137,6 +341,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     private String username;
     private String password;
     private String schema;
+    private String authEnabled;
+
     private String template;
     private String distributeJoins;
     private String enforceJoinOrder;
@@ -159,6 +365,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     private String dataRegion;
     private String binaryType;
     private boolean connected;
+    private boolean isAuthEnabled;
+    private boolean sslEnabled;
     private Annotation storeAnnotation;
     private Annotation primaryKey;
     private Annotation indices;
@@ -182,6 +390,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         username = storeAnnotation.getElement(ANNOTATION_ELEMENT_USERNAME);
         password = storeAnnotation.getElement(ANNOTATION_ELEMENT_PASSWORD);
         String tableName = storeAnnotation.getElement(ANNOTATION_ELEMENT_TABLE_NAME);
+        authEnabled = storeAnnotation.getElement(ANNOTATION_ELEMENT_AUTH_ENABLED);
         schema = storeAnnotation.getElement(SCHEMA);
         backups = storeAnnotation.getElement(BACKUPS);
         template = storeAnnotation.getElement(TEMPLATE);
@@ -205,15 +414,31 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         dataRegion = storeAnnotation.getElement(DATA_REGION);
 
         attributes = tableDefinition.getAttributeList();
-//        this.attributeNames = tableDefinition.getAttributeList().stream().map(Attribute::getName).
-//                collect(Collectors.toList());
         this.tableName = ApacheIgniteTableUtils.isEmpty(tableName) ? tableDefinition.getId() : tableName;
         if (ApacheIgniteTableUtils.isEmpty(url)) {
             throw new SiddhiAppCreationException("Required parameter '" + ANNOTATION_ELEMENT_URL + " for DB " +
                     "connectivity  cannot be empty for creating table : " + this.tableName);
         }
+        if (ApacheIgniteTableUtils.isEmpty(authEnabled) || authEnabled.equalsIgnoreCase("false")) {
+            isAuthEnabled = false;
+        } else if (authEnabled.equalsIgnoreCase("true")) {
+            isAuthEnabled = true;
+        }
+        if (isAuthEnabled) {
+            if (ApacheIgniteTableUtils.isEmpty(username)) {
+                throw new SiddhiAppCreationException("Required parameter " + ANNOTATION_ELEMENT_USERNAME + " for DB " +
+                        "connectivity cannot be empty for creating table : " + this.tableName +
+                        " when authentication is enabled ");
+            }
+            if (ApacheIgniteTableUtils.isEmpty(password)) {
+                throw new SiddhiAppCreationException("Required parameter " + ANNOTATION_ELEMENT_PASSWORD + " for DB " +
+                        "connectivity cannot be empty for creating table : " + this.tableName + "when authentication " +
+                        "is enabled ");
+            }
+        }
         if (primaryKey == null) {
-            throw new SiddhiAppCreationException("primary key field cannot be empty for " + this.tableName);
+            throw new SiddhiAppCreationException("primary key field cannot be empty for creating table : " +
+                    this.tableName);
         }
         primaryKeyAttributePositionList = new ArrayList<>();
         primaryKey.getElements().forEach(element -> {
@@ -337,7 +562,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                 return true;
             } else {
                 ApacheIgniteTableUtils.cleanupConnection(rs, st, con);
-                log.info("No results matching for given condition ");
+                log.info("No results matching for given condition in the table : " + this.tableName);
                 return false;
             }
 
@@ -427,7 +652,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             log.info(updateCondition);
         } catch (SQLException e) {
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
-            throw new ApacheIgniteTableException("Error performing record update operations on table '" + this.tableName
+            throw new ApacheIgniteTableException("Error performing record update operation on table '" + this.tableName
                     + "': " + e.getMessage(), e);
         }
     }
@@ -489,8 +714,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             statement.execute();
             ApacheIgniteTableUtils.cleanupConnection(null, statement, con);
         } catch (SQLException e) {
-            throw new ApacheIgniteTableException("Error in updating or inserting records to table '" + this.tableName
-                    + "': " + e.getMessage(), e);
+            throw new ApacheIgniteTableException("Error in updating or inserting records to the table '" +
+                    this.tableName + "': " + e.getMessage(), e);
         }
     }
 
@@ -534,7 +759,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     protected void connect() throws ConnectionUnavailableException {
 
         try {
-            //Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
+            // Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
             StringBuilder connectionParams = new StringBuilder();
             connectionParams.append(url);
             if (schema != null) {
@@ -600,11 +825,12 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             }
 
             log.info(connectionParams);
+            //Ignite ignite = Ignition.start();
             con = DriverManager.getConnection(connectionParams.toString());
             this.createTable(storeAnnotation, primaryKey, indices);
             connected = true;
         } catch (SQLException e) {
-            throw new ConnectionUnavailableException("unable to connect " + e.getMessage(), e);
+            throw new ConnectionUnavailableException("Failed to initialize apacheIgnite store  " + e.getMessage(), e);
         }
 //        } catch (ClassNotFoundException e) {
 //            throw new ConnectionUnavailableException("unable to find class" + e.getMessage(), e);
@@ -621,6 +847,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         try {
             if (connected) {
                 con.close();
+
             }
         } catch (SQLException e) {
             throw new ApacheIgniteTableException("unable to close connection");
@@ -634,6 +861,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     @Override
     protected void destroy() {
 
+        this.disconnect();
+        //  Ignition.kill(true);
 //        try {
 //            if (connected) {
 //                con.close();
@@ -663,7 +892,8 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         try {
             statement = con.prepareStatement(query);
         } catch (SQLException e) {
-            throw new ApacheIgniteTableException("unable to query " + e.getMessage());
+            throw new ApacheIgniteTableException("Error when preparing to execute query " +
+                    "in table :" + this.tableName + e.getMessage());
         }
         try {
             return new ApacheIgniteIterator(con, statement, statement.executeQuery(),
@@ -805,7 +1035,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         StringBuilder compiledSelectionList = new StringBuilder();
         SortedMap<Integer, Object> paramMap = new TreeMap<>();
         SortedMap<Integer, Object> paramCons = new TreeMap<>();
-        //  Map<Integer, Object> constantMap = igniteCompiledCondition.getParameterConstants();
 
         int offset = 0;
         for (ExpressionBuilder expressionBuilder : expressionBuilders) {
@@ -838,7 +1067,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         }
         String condition = compiledSelectionList.toString();
         for (Map.Entry<Integer, Object> map : paramCons.entrySet()) {
-
             Object constant = map.getValue();
             if (constant instanceof String) {
                 condition = condition.replaceFirst(Pattern.quote("*"), map.getValue().toString());
@@ -874,7 +1102,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                 if (ordinal > maxOrdinal) {
                     maxOrdinal = ordinal;
                 }
-
             }
             offset = maxOrdinal;
         }
@@ -924,7 +1151,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             tableCreateQuery.append(CLOSE_PARENTHESIS);
             tableCreateQuery.append(" WITH ").append("\"template").append(EQUAL);
 
-            //append(template);
             if (template != null) {
                 tableCreateQuery.append(template).append("\"");
             } else {
@@ -940,7 +1166,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                         .append("\"");
             }
             if (affinityKey != null) {
-                tableCreateQuery.append(SEPARATOR).append("\"").append("Affinity_Key").append(EQUAL)
+                tableCreateQuery.append(SEPARATOR).append("\"").append("affinity_Key").append(EQUAL)
                         .append(affinityKey).append("\"");
             }
             if (cacheName != null) {
@@ -1077,5 +1303,24 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         return sb.toString();
     }
 
+    public void doSSLValidation() {
+
+        if (ApacheIgniteTableUtils.isEmpty(SSL_MODE) || sslMode.equalsIgnoreCase("disable")) {
+            sslEnabled = false;
+        } else if (sslMode.equalsIgnoreCase("require")) {
+            sslEnabled = true;
+        }
+        if (sslEnabled) {
+            if (ApacheIgniteTableUtils.isEmpty(sslClientCertificateKeyStoreUrl)) {
+                throw new SiddhiAppCreationException("Required parameter " + sslClientCertificateKeyStoreUrl +
+                        " cannot be empty for creating table :" + this.tableName + " when ssl is enabled .");
+            }
+        }
+        if (ApacheIgniteTableUtils.isEmpty(sslTrustAll) &&
+                ApacheIgniteTableUtils.isEmpty(sslTrustCertificateKeyStoreUrl)) {
+            throw new SiddhiAppCreationException("Either one of the parameter " + sslTrustAll + " or" +
+                    sslTrustCertificateKeyStoreUrl + " must be given for creating table:" + this.tableName);
+        }
+    }
 }
 

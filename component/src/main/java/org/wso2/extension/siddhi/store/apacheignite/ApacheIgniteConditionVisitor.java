@@ -321,7 +321,6 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
 
-        //condition.append(this.tableName).append(".")
         condition.append(attributeName).append(ApacheIgniteConstants.WHITESPACE);
     }
 
@@ -349,9 +348,6 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
                 if (this.placeholders.containsKey(candidate)) {
                     this.parameters.put(ordinal, this.placeholders.get(candidate));
                     ordinal++;
-//                    if (candidate.equals("pattern-value")) {
-//                        ordinalOfContainPattern = ordinal;
-//                    }
                 } else if (this.placeholdersConstant.containsKey(candidate)) {
                     this.parametersConstant.put(ordinalCon, this.placeholdersConstant.get(candidate));
                     ordinalCon++;
@@ -390,29 +386,4 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         this.constantCount++;
         return name;
     }
-//
-//    /**
-//     * Method for generating a temporary placeholder for contains pattern as stream variables.
-//     *
-//     * @return a placeholder string of known format.
-//     */
-//    private String generatePatternStreamVarName() {
-//
-//        String name = "pattern-value" + this.streamVarCount;
-//        this.streamVarCount++;
-//        return name;
-//    }
-
-//    /**
-//     * Method for generating a temporary placeholder for contains pattern as constants.
-//     *
-//     * @return a placeholder string of known format.
-//     */
-//    private String generatePatternConstantName() {
-//
-//        String name = "pattern-value" + this.constantCount;
-//        this.constantCount++;
-//        return name;
-//    }
-
 }

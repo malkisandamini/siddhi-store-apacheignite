@@ -56,7 +56,6 @@ public class InsertIntoApacheIgniteTable {
 
         try {
             ApacheIgniteTestUtils.dropTable(TABLE_NAME);
-
         } catch (SQLException e) {
             log.info("Test case ignored due to " + e.getMessage());
         }
@@ -111,10 +110,7 @@ public class InsertIntoApacheIgniteTable {
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 100L});
         stockStream.send(new Object[]{"WS", 25.6f, 100L});
-
         Thread.sleep(500);
-        //int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
-
         siddhiAppRuntime.shutdown();
     }
 
@@ -146,10 +142,10 @@ public class InsertIntoApacheIgniteTable {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Testing insertion with specific fields ")
-    public void insertIntoTableWithSpecificFields() throws InterruptedException, SQLException {
+    @Test(description = "Testing insertion with specific attributes ")
+    public void insertIntoTableSelectingSpecificAttributes() throws InterruptedException, SQLException {
 
-        log.info("insertIntoTableWithSpecificFieldsTest");
+        log.info("insertIntoTableSelectingSpecificAttributesTest");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +

@@ -137,7 +137,7 @@ public class DeleteFromApacheIgniteTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Testing deletion with out using primary keys")
+    @Test(description = "Testing deletion without using primary keys")
     public void deleteFromTableWithNonPrimaryKeysTest() throws InterruptedException, SQLException {
 
         log.info("deleteFromTableWithNonPrimaryKeysTest");

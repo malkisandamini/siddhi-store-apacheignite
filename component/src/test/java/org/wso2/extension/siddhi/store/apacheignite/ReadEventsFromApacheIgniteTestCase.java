@@ -94,7 +94,6 @@ public class ReadEventsFromApacheIgniteTestCase {
                 "select StockTable.symbol as checkName, " +
                 "StockTable.volume as checkVolume," +
                 "StockTable.price as checkCategory\n " +
-
                 "insert into OutputStream;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");

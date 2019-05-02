@@ -119,5 +119,4 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
         this.statement = null;
         this.connection = null;
     }
-
 }

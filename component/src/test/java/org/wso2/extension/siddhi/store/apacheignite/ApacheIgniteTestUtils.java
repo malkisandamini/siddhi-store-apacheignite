@@ -42,8 +42,11 @@ public class ApacheIgniteTestUtils {
     public static void dropTable(String tableName) throws SQLException {
 
         try {
-            Connection con = DriverManager.getConnection(URL);
-            PreparedStatement st = con.prepareStatement("drop table " + tableName);
+            StringBuilder conParam = new StringBuilder();
+            conParam.append(URL).append(";").append("user=").append(USERNAME)
+                    .append(";").append("password=").append(PASSWORD);
+            Connection con = DriverManager.getConnection(conParam.toString());
+            PreparedStatement st = con.prepareStatement("drop table " + tableName + " if exists");
             st.execute();
         } catch (SQLException e) {
             log.debug("clearing table failed due to " + e.getMessage());
@@ -56,7 +59,10 @@ public class ApacheIgniteTestUtils {
         PreparedStatement statement;
         Connection con;
         try {
-            con = DriverManager.getConnection(URL);
+            StringBuilder conParam = new StringBuilder();
+            conParam.append(URL).append(";").append("user=").append(USERNAME)
+                    .append(";").append("password=").append(PASSWORD);
+            con = DriverManager.getConnection(conParam.toString());
             statement = con.prepareStatement("SELECT count(*) FROM " + tableName);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {

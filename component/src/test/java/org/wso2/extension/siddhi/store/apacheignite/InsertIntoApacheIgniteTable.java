@@ -80,7 +80,7 @@ public class InsertIntoApacheIgniteTable {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WS", 325.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 100L});
         Thread.sleep(500);
         int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);

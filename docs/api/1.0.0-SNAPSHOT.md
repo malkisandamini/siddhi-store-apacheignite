@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@Store(type="apacheignite", auth.enabled="<STRING>", username="<STRING>", password="<STRING>", schema="<STRING>", template="<STRING>", distributejoins="<STRING>", enforcejoinorder="<STRING>", collocated="<STRING>", replicatedonly="<STRING>", auto.close.server.cursor="<STRING>", socket.send.buffer="<STRING>", socket.receive.buffer="<STRING>", ssl.mode="<STRING>", ssl.client.certificate.key.store.url="<STRING>", ssl.client.certificate.key.store.password="<STRING>", ssl.client.certificate.key.store.type="<STRING>", ssl.trust.certificate.key.store.url="<INT|BOOL|STRING|DOUBLE>", ssl.trust.certificate.key.store.password="<STRING>", ssl.trust.all="<STRING>", backups="<STRING>", atomicity="<STRING>", affinity.key="<STRING>", cache.name="<STRING>", data.region="<STRING>")
+@Store(type="apacheignite", auth.enabled="<STRING>", username="<STRING>", password="<STRING>", schema="<STRING>", template="<STRING>", distributejoins="<STRING>", enforcejoinorder="<STRING>", collocated="<STRING>", replicatedonly="<STRING>", auto.close.server.cursor="<STRING>", socket.send.buffer="<STRING>", socket.receive.buffer="<STRING>", backups="<STRING>", atomicity="<STRING>", affinity.key="<STRING>", cache.name="<STRING>", data.region="<STRING>")
 @PrimaryKey("PRIMARY_KEY")
 @Index("INDEX")
 ```
@@ -115,62 +115,6 @@
         <td style="vertical-align: top">socket.receive.buffer</td>
         <td style="vertical-align: top; word-wrap: break-word">Socket receive buffer size.When set to 0, OS default will be used. </td>
         <td style="vertical-align: top"> 0</td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">ssl.mode</td>
-        <td style="vertical-align: top; word-wrap: break-word">Enables SSL connection </td>
-        <td style="vertical-align: top">disable </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">ssl.client.certificate.key.store.url</td>
-        <td style="vertical-align: top; word-wrap: break-word">URL of the client key store file. </td>
-        <td style="vertical-align: top">The value of the javax.net.ssl.keyStore system property </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">ssl.client.certificate.key.store.password</td>
-        <td style="vertical-align: top; word-wrap: break-word">Client key store password. </td>
-        <td style="vertical-align: top">The value of the javax.net.ssl.keyStorePassword system property. </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">ssl.client.certificate.key.store.type</td>
-        <td style="vertical-align: top; word-wrap: break-word">Client key store type used in context initialization. </td>
-        <td style="vertical-align: top">JKS</td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">ssl.trust.certificate.key.store.url</td>
-        <td style="vertical-align: top; word-wrap: break-word">URL of the trust store file </td>
-        <td style="vertical-align: top">The value of the javax.net.ssl.trustStore system property. </td>
-        <td style="vertical-align: top">INT<br>BOOL<br>STRING<br>DOUBLE</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">ssl.trust.certificate.key.store.password</td>
-        <td style="vertical-align: top; word-wrap: break-word">Trust store password. </td>
-        <td style="vertical-align: top"> The value of the javax.net.ssl.trustStorePassword system property. </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">ssl.trust.all</td>
-        <td style="vertical-align: top; word-wrap: break-word">Disables server's certificate validation.</td>
-        <td style="vertical-align: top">false </td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>

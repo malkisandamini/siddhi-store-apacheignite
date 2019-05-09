@@ -37,13 +37,7 @@ public class ApacheIgniteConstants {
     public static final String AUTO_CLOSE_SERVER_CURSER = "auto.close.server.cursor";
     public static final String SOCKET_SEND_BUFFER = "socket.send.buffer";
     public static final String SOCKET_RECEIVE_BUFFER = "socket.receive.buffer";
-    public static final String SSL_MODE = "ssl.mode";
-    public static final String SSL_CLIENT_CERTIFICATE_KEY_STORE_URL = "ssl.client.certificate.key.store.url";
-    public static final String SSL_CLIENT_CERTIFICATE_KEY_STORE_PASSWORD = "ssl.client.certificate.key.store.password";
-    public static final String SSL_CLIENT_CERTIFICATE_KEY_STORE_TYPE = "ssl.client.certificate.key.store.type";
-    public static final String SSL_TRUST_CERTIFICATE_KEY_STORE_URL = "ssl.trust.certificate.key.store.url";
-    public static final String SSL_TRUST_CERTIFICATE_KEY_STORE_PASSWORD = "ssl.trust.certificate.key.store.password";
-    public static final String SSL_TRUST_ALL = "ssl.trust.all";
+
     public static final String BACKUPS = "backups";
     public static final String ATOMICITY = "atomicity";
     public static final String AFFINITY_KEY = "affinity.key";

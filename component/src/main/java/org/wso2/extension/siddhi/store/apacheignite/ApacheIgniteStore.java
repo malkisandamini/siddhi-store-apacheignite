@@ -19,6 +19,7 @@ package org.wso2.extension.siddhi.store.apacheignite;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+//import org.apache.ignite.IgniteJdbcThinDriver;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -81,13 +82,6 @@ import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SOCKET_RECEIVE_BUFFER;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SOCKET_SEND_BUFFER;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SQL_PRIMARY_KEY_DEF;
-import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_CLIENT_CERTIFICATE_KEY_STORE_PASSWORD;
-import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_CLIENT_CERTIFICATE_KEY_STORE_TYPE;
-import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_CLIENT_CERTIFICATE_KEY_STORE_URL;
-import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_MODE;
-import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_TRUST_ALL;
-import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_TRUST_CERTIFICATE_KEY_STORE_PASSWORD;
-import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.SSL_TRUST_CERTIFICATE_KEY_STORE_URL;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.STRING;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.TABLE_CREATE_QUERY;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteConstants.TABLE_NAME;
@@ -201,55 +195,7 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         defaultValue = " 0",
                         type = {DataType.STRING}
                 ),
-                @Parameter(
-                        name = "ssl.mode",
-                        description = "Enables SSL connection ",
-                        optional = true,
-                        defaultValue = "disable ",
-                        type = {DataType.STRING}
-                ),
-                @Parameter(
-                        name = "ssl.client.certificate.key.store.url",
-                        description = "URL of the client key store file. ",
-                        optional = true,
-                        defaultValue = "The value of the javax.net.ssl.keyStore system property ",
-                        type = {DataType.STRING}
-                ),
-                @Parameter(
-                        name = "ssl.client.certificate.key.store.password",
-                        description = "Client key store password. ",
-                        optional = true,
-                        defaultValue = "The value of the javax.net.ssl.keyStorePassword system property. ",
-                        type = {DataType.STRING}
-                ),
-                @Parameter(
-                        name = "ssl.client.certificate.key.store.type",
-                        description = "Client key store type used in context initialization. ",
-                        optional = true,
-                        defaultValue = "JKS",
-                        type = {DataType.STRING}
-                ),
-                @Parameter(
-                        name = "ssl.trust.certificate.key.store.url",
-                        description = "URL of the trust store file ",
-                        optional = true,
-                        defaultValue = "The value of the javax.net.ssl.trustStore system property. ",
-                        type = {DataType.INT, DataType.BOOL, DataType.STRING, DataType.DOUBLE}
-                ),
-                @Parameter(
-                        name = "ssl.trust.certificate.key.store.password",
-                        description = "Trust store password. ",
-                        optional = true,
-                        defaultValue = " The value of the javax.net.ssl.trustStorePassword system property. ",
-                        type = {DataType.STRING}
-                ),
-                @Parameter(
-                        name = "ssl.trust.all",
-                        description = "Disables server's certificate validation.",
-                        optional = true,
-                        defaultValue = "false ",
-                        type = {DataType.STRING}
-                ),
+
                 @Parameter(
                         name = "backups",
                         description = "Number of backup copies of data.",
@@ -351,13 +297,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     private String autocloseServerCursor;
     private String socketSendBuffer;
     private String socketReceiveBuffer;
-    private String sslMode;
-    private String sslClientCertificateKeyStoreUrl;
-    private String sslClientCertificateKeyStorePassword;
-    private String sslClientCertificateKeyStoreType;
-    private String sslTrustCertificateKeyStoreUrl;
-    private String sslTrustCertificateKeyStorePassword;
-    private String sslTrustAll;
+
     private String backups;
     private String atomicity;
     private String affinityKey;
@@ -401,13 +341,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         autocloseServerCursor = storeAnnotation.getElement(AUTO_CLOSE_SERVER_CURSER);
         socketReceiveBuffer = storeAnnotation.getElement(SOCKET_RECEIVE_BUFFER);
         socketSendBuffer = storeAnnotation.getElement(SOCKET_SEND_BUFFER);
-        sslMode = storeAnnotation.getElement(SSL_MODE);
-        sslClientCertificateKeyStoreUrl = storeAnnotation.getElement(SSL_CLIENT_CERTIFICATE_KEY_STORE_URL);
-        sslClientCertificateKeyStorePassword = storeAnnotation.getElement(SSL_CLIENT_CERTIFICATE_KEY_STORE_PASSWORD);
-        sslClientCertificateKeyStoreType = storeAnnotation.getElement(SSL_CLIENT_CERTIFICATE_KEY_STORE_TYPE);
-        sslTrustCertificateKeyStoreUrl = storeAnnotation.getElement(SSL_TRUST_CERTIFICATE_KEY_STORE_URL);
-        sslTrustCertificateKeyStorePassword = storeAnnotation.getElement(SSL_TRUST_CERTIFICATE_KEY_STORE_PASSWORD);
-        sslTrustAll = storeAnnotation.getElement(SSL_TRUST_ALL);
+
         atomicity = storeAnnotation.getElement(ATOMICITY);
         affinityKey = storeAnnotation.getElement(AFFINITY_KEY);
         cacheName = storeAnnotation.getElement(CACHE_NAME);
@@ -759,7 +693,6 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     protected void connect() throws ConnectionUnavailableException {
 
         try {
-            // Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
             StringBuilder connectionParams = new StringBuilder();
             connectionParams.append(url);
             if (schema != null) {
@@ -797,44 +730,18 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
                 connectionParams.append(SEMI_COLON).append("socketReceiveBuffer").append(EQUAL)
                         .append(socketReceiveBuffer);
             }
-            if (sslMode != null) {
-                connectionParams.append(SEMI_COLON).append("sslMode").append(EQUAL).append(sslMode);
-            }
-            if (sslClientCertificateKeyStoreUrl != null) {
-                connectionParams.append(SEMI_COLON).append("sslClientCertificateKeyStoreUrl").append(EQUAL)
-                        .append(sslClientCertificateKeyStoreUrl);
-            }
-            if (sslClientCertificateKeyStorePassword != null) {
-                connectionParams.append(SEMI_COLON).append("sslClientCertificateKeyStorePassword").append(EQUAL)
-                        .append(sslClientCertificateKeyStorePassword);
-            }
-            if (sslClientCertificateKeyStoreType != null) {
-                connectionParams.append(SEMI_COLON).append("sslClientCertificateKeyStoreType").append(EQUAL)
-                        .append(sslClientCertificateKeyStoreType);
-            }
-            if (sslTrustCertificateKeyStoreUrl != null) {
-                connectionParams.append(SEMI_COLON).append("sslTrustCertificateKeyStoreUrl").append(EQUAL)
-                        .append(sslTrustCertificateKeyStoreUrl);
-            }
-            if (sslTrustCertificateKeyStorePassword != null) {
-                connectionParams.append(SEMI_COLON).append("sslTrustCertificateKeyStorePassword").append(EQUAL)
-                        .append(sslTrustCertificateKeyStorePassword);
-            }
-            if (sslTrustAll != null) {
-                connectionParams.append(SEMI_COLON).append("sslTrustAll").append(EQUAL).append(sslTrustAll);
-            }
 
             log.info(connectionParams);
-            //Ignite ignite = Ignition.start();
+            Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
             con = DriverManager.getConnection(connectionParams.toString());
             this.createTable(storeAnnotation, primaryKey, indices);
             connected = true;
         } catch (SQLException e) {
             throw new ConnectionUnavailableException("Failed to initialize apacheIgnite store  " + e.getMessage(), e);
+
+        } catch (ClassNotFoundException e) {
+            throw new ConnectionUnavailableException("unable to find class " + e.getMessage(), e);
         }
-//        } catch (ClassNotFoundException e) {
-//            throw new ConnectionUnavailableException("unable to find class" + e.getMessage(), e);
-//        }
     }
 
     /**
@@ -861,15 +768,14 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     @Override
     protected void destroy() {
 
-        this.disconnect();
-        //  Ignition.kill(true);
-//        try {
-//            if (connected) {
-//                con.close();
-//            }
-//        } catch (SQLException e) {
-//            throw new ApacheIgniteTableException("unable to close connection");
-//        }
+         this.disconnect();
+        try {
+            if (connected) {
+                con.close();
+            }
+        } catch (SQLException e) {
+            throw new ApacheIgniteTableException("unable to close connection");
+        }
     }
 
     @Override
@@ -1303,24 +1209,5 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
         return sb.toString();
     }
 
-    public void doSSLValidation() {
-
-        if (ApacheIgniteTableUtils.isEmpty(SSL_MODE) || sslMode.equalsIgnoreCase("disable")) {
-            sslEnabled = false;
-        } else if (sslMode.equalsIgnoreCase("require")) {
-            sslEnabled = true;
-        }
-        if (sslEnabled) {
-            if (ApacheIgniteTableUtils.isEmpty(sslClientCertificateKeyStoreUrl)) {
-                throw new SiddhiAppCreationException("Required parameter " + sslClientCertificateKeyStoreUrl +
-                        " cannot be empty for creating table :" + this.tableName + " when ssl is enabled .");
-            }
-        }
-        if (ApacheIgniteTableUtils.isEmpty(sslTrustAll) &&
-                ApacheIgniteTableUtils.isEmpty(sslTrustCertificateKeyStoreUrl)) {
-            throw new SiddhiAppCreationException("Either one of the parameter " + sslTrustAll + " or" +
-                    sslTrustCertificateKeyStoreUrl + " must be given for creating table:" + this.tableName);
-        }
-    }
 }
 

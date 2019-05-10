@@ -38,7 +38,6 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
     private PreparedStatement statement;
     private ResultSet resultSet;
     private String tableName;
-
     private List<Attribute> attributes;
     private List<String> attributeNames;
 

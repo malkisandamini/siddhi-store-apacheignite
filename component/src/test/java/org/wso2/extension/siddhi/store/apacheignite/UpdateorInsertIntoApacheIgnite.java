@@ -66,7 +66,7 @@ public class UpdateorInsertIntoApacheIgnite {
     @Test(description = "Testing updating or inserting with stream variable")
     public void updateOrInsertIntoTableTest() throws InterruptedException, SQLException {
 
-        log.info("UpdateORInsertIntoTableTest");
+        log.info("UpdateOrInsertIntoTableTest1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -104,7 +104,7 @@ public class UpdateorInsertIntoApacheIgnite {
     @Test(description = "Testing updating or inserting with constants")
     public void updateOrInsertIntoTableTest2() throws InterruptedException, SQLException {
 
-        log.info("UpdateORInsertIntoTableTest");
+        log.info("UpdateOrInsertIntoTableTest2");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -142,7 +142,7 @@ public class UpdateorInsertIntoApacheIgnite {
     @Test(description = "Testing updating or inserting with non primary key attributes ")
     public void updateOrInsertIntoTableTest3() throws InterruptedException, SQLException {
 
-        log.info("UpdateORInsertIntoTableTest");
+        log.info("UpdateOrInsertIntoTableTest3");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -181,7 +181,7 @@ public class UpdateorInsertIntoApacheIgnite {
             expectedExceptions = DuplicateDefinitionException.class)
     public void updateOrInsertIntoTableTest4() throws InterruptedException, SQLException {
 
-        log.info("UpdateORInsertIntoTableTest");
+        log.info("UpdateOrInsertIntoTableTest4");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +

@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * Implementation of class corresponding to Apache Ignite store.
- * Maintains the compiled select,group by, having, order by, limit clauses.
+ * Maintains the compiled select,group by, having, order by and limit clauses.
  */
 public class ApacheIgniteCompiledSelection implements CompiledSelection {
 

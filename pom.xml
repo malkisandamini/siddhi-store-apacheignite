@@ -76,15 +76,17 @@
     </properties>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.apache.ignite</groupId>
-                <artifactId>ignite-core</artifactId>
-                <version>${ignite.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>org.apache.ignite</groupId>-->
+                <!--<artifactId>ignite-core</artifactId>-->
+                <!--<version>${ignite.version}</version>-->
+                <!--<scope>runtime</scope>-->
+            <!--</dependency>-->
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-core</artifactId>
                 <version>${siddhi.version}</version>
+
             </dependency>
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
@@ -126,6 +128,20 @@
                 <classifier>runtime</classifier>
                 <version>${jacoco.maven.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.ignite</groupId>
+                <artifactId>ignite-indexing</artifactId>
+                <version>${ignite.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ignite</groupId>
+                <artifactId>ignite-core</artifactId>
+                <version>${ignite.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+
         </dependencies>
     </dependencyManagement>
     <build>

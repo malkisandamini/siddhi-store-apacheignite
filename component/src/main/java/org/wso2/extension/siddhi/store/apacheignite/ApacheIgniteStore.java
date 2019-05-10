@@ -732,7 +732,15 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
             }
 
             log.info(connectionParams);
-            Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
+            try {
+
+                Class.forName("org.apache.ignite.IgniteJdbcThinDriver"); // org.apache.ignite.IgniteJdbcThinDriver
+            } catch (NoClassDefFoundError e) {
+                log.error(" hello ===========", e);
+
+            }
+            log.info("******connected********");
+
             con = DriverManager.getConnection(connectionParams.toString());
             this.createTable(storeAnnotation, primaryKey, indices);
             connected = true;
@@ -768,7 +776,7 @@ public class ApacheIgniteStore extends AbstractQueryableRecordTable {
     @Override
     protected void destroy() {
 
-         this.disconnect();
+        this.disconnect();
         try {
             if (connected) {
                 con.close();

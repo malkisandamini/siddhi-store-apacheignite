@@ -93,5 +93,4 @@ public class ApacheIgniteCompiledSelection implements CompiledSelection {
 
         return selectAttributes;
     }
-
 }

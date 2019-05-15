@@ -115,13 +115,11 @@ public class ReadEventsFromApacheIgniteTestCase {
         stockStream.send(new Object[]{"WSO2", 325.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
         stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
-
         fooStream.send(new Object[]{"WSO2"});
         fooStream.send(new Object[]{"CSC"});
         fooStream.send(new Object[]{"IBM"});
-
         Thread.sleep(500);
-        Assert.assertEquals(eventArrived, true, "Event arrived");
+        Assert.assertTrue(eventArrived, "Event arrived");
         Assert.assertEquals(removeEventCount, 0, "Number of remove events ");
         siddhiAppRuntime.shutdown();
     }
@@ -171,11 +169,10 @@ public class ReadEventsFromApacheIgniteTestCase {
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 100L});
         stockStream.send(new Object[]{"GOOG", 12.6F, 150L});
-
         fooStream.send(new Object[]{150});
         fooStream.send(new Object[]{200});
         Thread.sleep(500);
-        Assert.assertEquals(eventArrived, true, "Event arrived");
+        Assert.assertTrue(eventArrived, "Event arrived");
         Assert.assertEquals(removeEventCount, 0, "Number of remove events");
         siddhiAppRuntime.shutdown();
     }
@@ -224,17 +221,16 @@ public class ReadEventsFromApacheIgniteTestCase {
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 100L});
         stockStream.send(new Object[]{"GOOG", 12.6F, 150L});
-
         fooStream.send(new Object[]{150});
         fooStream.send(new Object[]{200});
         Thread.sleep(500);
-        Assert.assertEquals(eventArrived, true, "Event arrived");
+        Assert.assertTrue(eventArrived, "Event arrived");
         Assert.assertEquals(removeEventCount, 0, "Number of remove events");
         siddhiAppRuntime.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiParserException.class, description = "Read unsuccessfully from non existing table")
-    public void readFromNonExistingTableTest() throws InterruptedException, SQLException {
+    public void readFromNonExistingTableTest() throws InterruptedException {
 
         log.info("readFromNonExistingTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -244,7 +240,7 @@ public class ReadEventsFromApacheIgniteTestCase {
                 "@info(name = 'query2')\n " +
                 "from FooStream#window.length(2) join StockTable on StockTable.symbol==FooStream.name \n" +
                 "select StockTable.symbol as checkName, StockTable.price as checkCategory, " +
-                "StockTable.volume as checkVolume,StockTable.time as checkTime\n" +
+                "StockTable.volume as checkVolume\n" +
                 "insert into OutputStream;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
@@ -299,13 +295,13 @@ public class ReadEventsFromApacheIgniteTestCase {
         stockStream.send(new Object[]{"IBM", 97.6f, 100L});
         fooStream.send(new Object[]{"WSO2"});
         Thread.sleep(1000);
-        Assert.assertEquals(eventArrived, true, "Event arrived");
+        Assert.assertTrue(eventArrived, "Event arrived");
         Assert.assertEquals(removeEventCount, 0, "Number of remove events");
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "Read  multiple events from a apache ignite table successfully with window.time.")
-    public void readEventsFromIgniteTableTest() throws InterruptedException, SQLException {
+    public void readEventsFromIgniteTableTest() throws InterruptedException {
 
         log.info("readEventsFromTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -354,13 +350,13 @@ public class ReadEventsFromApacheIgniteTestCase {
         fooStream.send(new Object[]{"IBM"});
         fooStream.send(new Object[]{"MIT"});
         Thread.sleep(1000);
-        Assert.assertEquals(eventArrived, true, "Event arrived");
+        Assert.assertTrue(eventArrived, "Event arrived");
         Assert.assertEquals(removeEventCount, 0, "Number of remove events");
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "Read  multiple events from a apache ignite table successfully with window.length.")
-    public void readEventsFromApacheIgniteTableTest() throws InterruptedException, SQLException {
+    public void readEventsFromApacheIgniteTableTest() throws InterruptedException {
 
         log.info("readEventsFromTableTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -380,7 +376,7 @@ public class ReadEventsFromApacheIgniteTestCase {
                 "select *\n" +
                 "insert into StockTable;\n" +
                 "@info(name = 'query2')\n " +
-                "from FooStream#window.time(5 sec) join StockTable on StockTable.symbol==FooStream.name \n" +
+                "from FooStream#window.length(1) join StockTable on StockTable.symbol==FooStream.name \n" +
                 "select StockTable.symbol as checkName, StockTable.price as checkCategory, " +
                 "StockTable.volume as checkVolume\n" +
                 "insert into OutputStream;";
@@ -409,7 +405,7 @@ public class ReadEventsFromApacheIgniteTestCase {
         fooStream.send(new Object[]{"IBM"});
         fooStream.send(new Object[]{"MIT"});
         Thread.sleep(1000);
-        Assert.assertEquals(eventArrived, true, "Event arrived");
+        Assert.assertTrue(eventArrived, "Event arrived");
         Assert.assertEquals(removeEventCount, 0, "Number of remove events");
         siddhiAppRuntime.shutdown();
     }

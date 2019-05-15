@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@Store(type="apacheignite", auth.enabled="<STRING>", username="<STRING>", password="<STRING>", schema="<STRING>", template="<STRING>", distributejoins="<STRING>", enforcejoinorder="<STRING>", collocated="<STRING>", replicatedonly="<STRING>", auto.close.server.cursor="<STRING>", socket.send.buffer="<STRING>", socket.receive.buffer="<STRING>", backups="<STRING>", atomicity="<STRING>", affinity.key="<STRING>", cache.name="<STRING>", data.region="<STRING>")
+@Store(type="apacheignite", url="<STRING>", auth.enabled="<STRING>", username="<STRING>", password="<STRING>", table.name="<STRING>", schema="<STRING>", template="<STRING>", distributejoins="<STRING>", enforcejoinorder="<STRING>", collocated="<STRING>", replicatedonly="<STRING>", auto.close.server.cursor="<STRING>", socket.send.buffer="<STRING>", socket.receive.buffer="<STRING>", backups="<STRING>", atomicity="<STRING>", affinity.key="<STRING>", cache.name="<STRING>", data.region="<STRING>")
 @PrimaryKey("PRIMARY_KEY")
 @Index("INDEX")
 ```
@@ -22,6 +22,14 @@
         <th>Possible Data Types</th>
         <th>Optional</th>
         <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">url</td>
+        <td style="vertical-align: top; word-wrap: break-word">Describes the url required for establishing the connection with apache ignitestore. </td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
     </tr>
     <tr>
         <td style="vertical-align: top">auth.enabled</td>
@@ -43,6 +51,14 @@
         <td style="vertical-align: top">password</td>
         <td style="vertical-align: top; word-wrap: break-word">password for SQL connection.Mandatory parameter if the authentication is enabled on the server. </td>
         <td style="vertical-align: top">ignite</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">table.name</td>
+        <td style="vertical-align: top; word-wrap: break-word">The name with which the Siddhi store must be persisted in the Apache Ignite store. If no name is specified via this parameter, the store is persisted in the Apache Ignite with the same name defined in the table definition of the Siddhi application.</td>
+        <td style="vertical-align: top">The table name defined in the Siddhi Application query.</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -114,7 +130,7 @@
     <tr>
         <td style="vertical-align: top">socket.receive.buffer</td>
         <td style="vertical-align: top; word-wrap: break-word">Socket receive buffer size.When set to 0, OS default will be used. </td>
-        <td style="vertical-align: top"> 0</td>
+        <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>

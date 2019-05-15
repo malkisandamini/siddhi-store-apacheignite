@@ -89,7 +89,7 @@ public class InsertIntoApacheIgniteTable {
     }
 
     @Test(description = "Testing insertion with duplicate primary key ")
-    public void insertIntoTableWithDuplicatePrimaryKeyTest() throws InterruptedException, SQLException {
+    public void insertIntoTableWithDuplicatePrimaryKeyTest() throws InterruptedException {
 
         log.info("insertIntoTableWithDuplicatePrimaryKeyTest");
         SiddhiManager siddhiManager = new SiddhiManager();

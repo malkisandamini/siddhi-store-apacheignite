@@ -126,13 +126,12 @@ public class ContainsIn {
         stockStream.send(new Object[]{"WSO2", 325.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
         stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
-
         fooStream.send(new Object[]{"WSO2", 100});
         fooStream.send(new Object[]{"IBM", 10});
         fooStream.send(new Object[]{"WSO22", 100});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(inEventCount, 2, "Number of success events");
-        Assert.assertEquals(eventArrived, true, "success");
+        Assert.assertTrue(eventArrived, "success");
         siddhiAppRuntime.shutdown();
     }
 
@@ -188,18 +187,18 @@ public class ContainsIn {
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 10L});
         stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
-
         fooStream.send(new Object[]{"WS", 100});
         fooStream.send(new Object[]{"IB", 10});
+        fooStream.send(new Object[]{"GOOG", 10});
         fooStream.send(new Object[]{"WSO22", 100});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(inEventCount, 2, "Number of success events");
-        Assert.assertEquals(eventArrived, true, "success");
+        Assert.assertTrue(eventArrived, "success");
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "Testing with already defined outputstream.")
-    public void containsCheckTestWithDefinedStream() throws InterruptedException, SQLException {
+    public void containsCheckTestWithDefinedStream() throws InterruptedException {
 
         log.info("containsCheckTestWithDefinedStream");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -257,7 +256,7 @@ public class ContainsIn {
         fooStream.send(new Object[]{"WSO22", 100});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(inEventCount, 2, "Number of success events");
-        Assert.assertEquals(eventArrived, true, "success");
+        Assert.assertTrue(eventArrived, "success");
         siddhiAppRuntime.shutdown();
     }
 }

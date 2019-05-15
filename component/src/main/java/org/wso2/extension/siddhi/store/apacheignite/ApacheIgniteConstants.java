@@ -30,8 +30,8 @@ public class ApacheIgniteConstants {
 
     public static final String SCHEMA = "schema";
     public static final String TEMPLATE = "template";
-    public static final String DISTRIBUTED_JOINS = "distributedjoins";
-    public static final String ENFORCE_JOIN_ORDER = "enforcejoinorder";
+    public static final String DISTRIBUTED_JOINS = "distributed.joins";
+    public static final String ENFORCE_JOIN_ORDER = "enforce.join.order";
     public static final String COLLOCATED = "collocated";
     public static final String REPLICATED_ONLY = "replicatedonly";
     public static final String AUTO_CLOSE_SERVER_CURSER = "auto.close.server.cursor";
@@ -67,18 +67,29 @@ public class ApacheIgniteConstants {
     public static final String CLOSE_PARENTHESIS = ")";
     public static final String WHITESPACE = " ";
     public static final String SEPARATOR = ",";
-    public static final String SEMI_COLON = ";";
+    public static final String SEMICOLON = ";";
     public static final String EQUAL = "=";
 
-    public static final String BOOLEAN = "boolean ";
-    public static final String STRING = " varchar";
+    public static final String BOOLEAN = "boolean";
+    public static final String DOUBLE = "double";
+    public static final String STRING = "varchar";
     public static final String LONG = "long";
     public static final String FLOAT = "float";
+    public static final String INTEGER = "int";
 
     public static final String INSERT_QUERY = "insert into {{tableName}} ({{columns}}) values ({{values}})";
     public static final String COLUMNS = "{{columns}}";
     public static final String VALUES = "{{values}}";
     public static final String TABLE_NAME = "{{tableName}}";
     public static final String TABLE_CREATE_QUERY = "CREATE TABLE IF NOT EXISTS  ";
+    public static final String SELECT = "SELECT";
+    public static final String FROM = "FROM";
+    public static final String WHERE = "WHERE";
+    public static final String DELETE = "DELETE";
+    public static final String UPDATE = "UPDATE";
+    public static final String SET = "SET";
+    public static final String MERGE = "MERGE INTO";
+    public static final String VALUE = "VALUES";
+    public static final String AS = "AS";
 
 }

@@ -59,12 +59,6 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>${commons.logging.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>2.0.1</version>
         </dependency>
     </dependencies>
     <build>
@@ -133,10 +127,13 @@
                             org.wso2.extension.siddhi.store.apacheignite.*,
                         </Export-Package>
                         <Import-Package>
+                            org.apache.commons.logging.*;version="${commons.logging.version.range}",
+                            org.wso2.siddhi.annotation.*;version="${siddhi.version.range}",
+                            org.wso2.siddhi.core.*;version="${siddhi.version.range}",
+                            org.wso2.siddhi.query.api.*;version="${siddhi.version.range}",
                             *;resolution:=optional,
                         </Import-Package>
                         <Private-Package>
-
                         </Private-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Include-Resource>

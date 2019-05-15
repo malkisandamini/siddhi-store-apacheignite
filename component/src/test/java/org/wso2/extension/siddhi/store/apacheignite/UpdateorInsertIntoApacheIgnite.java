@@ -168,7 +168,7 @@ public class UpdateorInsertIntoApacheIgnite {
         siddhiAppRuntime.start();
         stockStream.send(new Object[]{"WS", 325.6f, 100L});
         stockStream.send(new Object[]{"IB", 75.6f, 100L});
-        updateStockStream.send(new Object[]{"GOOG", 12.6F, 100L});
+        stockStream.send(new Object[]{"GOOG", 12.6F, 100L});
         updateStockStream.send(new Object[]{"GOOG", 1278.6F, 200L});
         updateStockStream.send(new Object[]{"IB", 27.6F, 101L});
         Thread.sleep(500);
@@ -179,7 +179,7 @@ public class UpdateorInsertIntoApacheIgnite {
 
     @Test(description = "Testing updating or inserting with duplicate stream definitions ",
             expectedExceptions = DuplicateDefinitionException.class)
-    public void updateOrInsertIntoTableTest4() throws InterruptedException, SQLException {
+    public void updateOrInsertIntoTableTest4() throws InterruptedException {
 
         log.info("UpdateOrInsertIntoTableTest4");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -211,6 +211,5 @@ public class UpdateorInsertIntoApacheIgnite {
         updateStockStream.send(new Object[]{"GOOG", 1278.6F});
         siddhiAppRuntime.shutdown();
     }
-
 }
 

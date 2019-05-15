@@ -96,13 +96,12 @@ public class ApacheIgniteIterator implements RecordIterator<Object[]> {
                         case LONG:
                             result.add(rs.getLong(attribute.getName()));
                             break;
-                        case OBJECT:
-                            result.add(rs.getObject(attribute.getName()));
-                            break;
                         case STRING:
                             result.add(rs.getString(attribute.getName()));
                             break;
-
+                        case OBJECT:
+                            result.add(rs.getObject(attribute.getName()));
+                            break;
                     }
                 }
             }

@@ -2,6 +2,23 @@
 ======================================
 
 
+The **siddhi-store-apacheignite extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that  can be used to persist events to an RDBMS instance of the user's choice.
+Find some useful links below:
+
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite">Source code</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/releases">Releases</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/issues">Issue tracker</a>
+
+## Latest API Docs 
+
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-apacheignite/api/5.0.0">5.0.0</a>.
+
+## Prerequisites
+
+ * A Apache Ignite server instance should be started.
+ * The user should have the necessary privileges and access rights to connect to the Apache Ignite data store of choice.
+
+## How to use 
 
 
 
@@ -24,7 +41,13 @@
 ```
 
 
-
+## How to Contribute
+ 
+  * Please report issues at <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/issues">GitHub Issue Tracker</a>.
+  
+  * Send your contributions as pull requests to <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/tree/master">master branch</a>. 
+ 
+## Contact us 
 
 
 
@@ -38,6 +61,7 @@
 
     Architecture List : [architecture@wso2.org](mailto:architecture@wso2.org)
 
+## Support 
 
 * We are committed to ensuring support for this extension in production. Our unique approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology.
 

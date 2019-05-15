@@ -92,7 +92,7 @@ public class DefineTableTestCase {
 
     @Test(description = "Testing table creation with no primary key ",
             expectedExceptions = SiddhiAppCreationException.class)
-    public void createTableWithNoPrimaryKeyTest() throws InterruptedException, SQLException {
+    public void createTableWithNoPrimaryKeyTest() {
 
         log.info("createTableWithNoPrimaryKeyTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -109,7 +109,7 @@ public class DefineTableTestCase {
 
     @Test(description = "Testing table creation without defining value for url ",
             expectedExceptions = SiddhiAppCreationException.class)
-    public void createTableWithTest() throws InterruptedException, SQLException {
+    public void createTableWithTest() {
 
         log.info("createTableWithoutUrlTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -125,19 +125,13 @@ public class DefineTableTestCase {
                 "from StockStream\n" +
                 "insert into StockTable ;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WS", 325.6f, 100L});
-        stockStream.send(new Object[]{"IB", 75.6f, 100L});
-        Thread.sleep(100);
-        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
-        Assert.assertEquals(rowsInTable, 2, "Insertion failed");
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "Testing table creation without url field ",
             expectedExceptions = SiddhiAppCreationException.class)
-    public void createTableWithoutUrlFieldTest() throws InterruptedException, SQLException {
+    public void createTableWithoutUrlFieldTest()  {
 
         log.info("createTableWithoutUrlField");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -153,18 +147,12 @@ public class DefineTableTestCase {
                 "from StockStream\n" +
                 "insert into StockTable ;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WS", 325.6f, 100L});
-        stockStream.send(new Object[]{"IB", 75.6f, 100L});
-        Thread.sleep(100);
-        int rowsInTable = ApacheIgniteTestUtils.getRowsInTable(TABLE_NAME);
-        Assert.assertEquals(rowsInTable, 2, "Insertion failed");
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "Testing table creation with invalid url ")
-    public void createTableWithInvalidUrlTest() throws InterruptedException, SQLException {
+    public void createTableWithInvalidUrlTest() {
 
         log.info("createTableWithInvalidUrlTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -176,15 +164,13 @@ public class DefineTableTestCase {
                 "@PrimaryKey(\"symbol\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
-        Thread.sleep(200);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "Testing table creation without defining value for username field ",
             expectedExceptions = SiddhiAppCreationException.class)
-    public void createTableWithoutDefineUsernameTest() throws InterruptedException, SQLException {
+    public void createTableWithoutDefineUsernameTest() {
 
         log.info("createTableWithoutDefineUsernameTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -197,12 +183,11 @@ public class DefineTableTestCase {
                 "define table StockTable (symbol string, price float, volume long); ";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
         siddhiAppRuntime.start();
-        Thread.sleep(100);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "Testing table creation with incorrect username field ")
-    public void createTableWithIncorrectUsernameTest() throws InterruptedException, SQLException {
+    public void createTableWithIncorrectUsernameTest() {
 
         log.info("createTableWithIncorrectUsernameTest");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -215,7 +200,6 @@ public class DefineTableTestCase {
                 "define table StockTable (symbol string, price float, volume long); ";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
         siddhiAppRuntime.start();
-        Thread.sleep(100);
         siddhiAppRuntime.shutdown();
     }
 

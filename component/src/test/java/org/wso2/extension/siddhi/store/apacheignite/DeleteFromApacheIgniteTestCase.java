@@ -56,7 +56,6 @@ public class DeleteFromApacheIgniteTestCase {
 
         try {
             ApacheIgniteTestUtils.dropTable(TABLE_NAME);
-
         } catch (SQLException e) {
             log.info("Test case ignored due to " + e.getMessage());
         }

@@ -34,7 +34,6 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
 
     private StringBuilder condition;
     private String finalCompiledCondition;
-
     private Map<String, Object> placeholders;
     private Map<String, Object> placeholdersConstant;
     private SortedMap<Integer, Object> parameters;
@@ -329,13 +328,6 @@ public class ApacheIgniteConditionVisitor extends BaseExpressionVisitor {
         //Not applicable
     }
 
-    /**
-     * Util method for walking through the generated condition string and isolating the parameters which will be filled
-     * in later as part of building the SQL statement. This method will:
-     * (a) eliminate all temporary placeholders and put "?" in their places.
-     * (b) build and maintain a sorted map of ordinals and the coresponding parameters which will fit into the above
-     * places in the PreparedStatement.
-     */
     private void parametrizeCondition() {
 
         String query = this.condition.toString();

@@ -33,7 +33,7 @@ public class ApacheIgniteTableUtils {
     private static final Log log = LogFactory.getLog(ApacheIgniteTableUtils.class);
 
     private ApacheIgniteTableUtils() {
-        //preventing initialization
+
     }
 
     public static boolean isEmpty(String field) {

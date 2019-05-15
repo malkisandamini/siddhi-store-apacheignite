@@ -27,22 +27,37 @@ public class ApacheIgniteConstants {
     public static final String ANNOTATION_ELEMENT_AUTH_ENABLED = "auth.enabled";
     public static final String ANNOTATION_ELEMENT_USERNAME = "username";
     public static final String ANNOTATION_ELEMENT_PASSWORD = "password";
-
     public static final String SCHEMA = "schema";
     public static final String TEMPLATE = "template";
-    public static final String DISTRIBUTED_JOINS = "distributed.joins";
+    public static final String DISTRIBUTE_JOINS = "distributed.joins";
     public static final String ENFORCE_JOIN_ORDER = "enforce.join.order";
     public static final String COLLOCATED = "collocated";
-    public static final String REPLICATED_ONLY = "replicatedonly";
+    public static final String REPLICATED_ONLY = "replicated.only";
     public static final String AUTO_CLOSE_SERVER_CURSER = "auto.close.server.cursor";
     public static final String SOCKET_SEND_BUFFER = "socket.send.buffer";
     public static final String SOCKET_RECEIVE_BUFFER = "socket.receive.buffer";
-
     public static final String BACKUPS = "backups";
     public static final String ATOMICITY = "atomicity";
     public static final String AFFINITY_KEY = "affinity.key";
     public static final String CACHE_NAME = "cache.name";
     public static final String DATA_REGION = "data.region";
+    public static final String IGNITE_USER = "user";
+    public static final String IGNITE_PASSWORD = "password";
+    public static final String IGNITE_TEMPLATE = "template";
+    public static final String IGNITE_DISTRIBUTE_JOINS = "distributeJoins";
+    public static final String IGNITE_ENFORCE_JOIN_ORDER = "enforceJoinOrder";
+    public static final String IGNITE_COLLOCATED = "collocated";
+    public static final String IGNITE_REPLICATED_ONLY = "replicatedOnly";
+    public static final String IGNITE_AUTO_CLOSE_SERVER_CURSER = "autocloseServerCursor";
+    public static final String IGNITE_SOCKET_SEND_BUFFER = "socketSendBuffer";
+    public static final String IGNITE_SOCKET_RECEIVE_BUFFER = "socketReceiveBuffer";
+
+    public static final String IGNITE_BACKUPS = "Backups";
+    public static final String IGNITE_ATOMICITY = "Atomicity";
+    public static final String IGNITE_AFFINITY_KEY = "affinity_Key";
+    public static final String IGNITE_CACHE_NAME = "Cache_name";
+    public static final String IGNITE_DATA_REGION = "Data_region";
+    public static final String IGNITE_PARTITIONED = "PARTITIONED";
 
     public static final String SQL_PRIMARY_KEY_DEF = "PRIMARY KEY";
     public static final String SQL_AND = "AND";
@@ -69,6 +84,8 @@ public class ApacheIgniteConstants {
     public static final String SEPARATOR = ",";
     public static final String SEMICOLON = ";";
     public static final String EQUAL = "=";
+    public static final String SLASH = "/";
+    public static final String DOUBLE_QUOTES = "\"";
 
     public static final String BOOLEAN = "boolean";
     public static final String DOUBLE = "double";
@@ -91,5 +108,6 @@ public class ApacheIgniteConstants {
     public static final String MERGE = "MERGE INTO";
     public static final String VALUE = "VALUES";
     public static final String AS = "AS";
+    public static final String WITH = "WITH";
 
 }

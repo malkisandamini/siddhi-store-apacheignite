@@ -93,6 +93,10 @@ public class StoreQueryTestCase {
         Event[] events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "select*");
+        EventPrinter.print(events);
         AssertJUnit.assertEquals(3, events.length);
         events = siddhiAppRuntime.query("" +
                 "from StockTable " +

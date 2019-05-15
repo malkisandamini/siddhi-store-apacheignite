@@ -23,7 +23,7 @@
         <classes>
             <class name="org.wso2.extension.siddhi.store.apacheignite.DeleteFromApacheIgniteTestCase"/>
             <class name="org.wso2.extension.siddhi.store.apacheignite.InsertIntoApacheIgniteTable"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.ContainsIn"/>
+            <class name="org.wso2.extension.siddhi.store.apacheignite.ContainsInApacheIgniteTestCase"/>
             <class name="org.wso2.extension.siddhi.store.apacheignite.DefineTableTestCase"/>
             <class name="org.wso2.extension.siddhi.store.apacheignite.UpdateFromApacheIgniteTestCase"/>
             <class name="org.wso2.extension.siddhi.store.apacheignite.UpdateorInsertIntoApacheIgnite"/>

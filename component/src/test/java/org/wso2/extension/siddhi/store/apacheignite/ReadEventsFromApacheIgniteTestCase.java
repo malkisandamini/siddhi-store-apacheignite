@@ -41,7 +41,7 @@ import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteTestUtils
 
 public class ReadEventsFromApacheIgniteTestCase {
 
-    private static final Log log = LogFactory.getLog(UpdateFromApacheIgniteTestCase.class);
+    private static final Log log = LogFactory.getLog(ReadEventsFromApacheIgniteTestCase.class);
 
     private int removeEventCount;
     private boolean eventArrived;
@@ -409,4 +409,5 @@ public class ReadEventsFromApacheIgniteTestCase {
         Assert.assertEquals(removeEventCount, 0, "Number of remove events");
         siddhiAppRuntime.shutdown();
     }
+
 }

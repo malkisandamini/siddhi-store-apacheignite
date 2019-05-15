@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@Store(type="apacheignite", url="<STRING>", auth.enabled="<STRING>", username="<STRING>", password="<STRING>", table.name="<STRING>", schema="<STRING>", template="<STRING>", distributejoins="<STRING>", enforcejoinorder="<STRING>", collocated="<STRING>", replicatedonly="<STRING>", auto.close.server.cursor="<STRING>", socket.send.buffer="<STRING>", socket.receive.buffer="<STRING>", backups="<STRING>", atomicity="<STRING>", affinity.key="<STRING>", cache.name="<STRING>", data.region="<STRING>")
+@Store(type="apacheignite", url="<STRING>", auth.enabled="<STRING>", username="<STRING>", password="<STRING>", table.name="<STRING>", schema="<STRING>", template="<STRING>", distribute.joins="<STRING>", enforce.join.order="<STRING>", collocated="<STRING>", replicated.only="<STRING>", auto.close.server.cursor="<STRING>", socket.send.buffer="<STRING>", socket.receive.buffer="<STRING>", backups="<STRING>", atomicity="<STRING>", affinity.key="<STRING>", cache.name="<STRING>", data.region="<STRING>")
 @PrimaryKey("PRIMARY_KEY")
 @Index("INDEX")
 ```
@@ -57,7 +57,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">table.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">The name with which the Siddhi store must be persisted in the Apache Ignite store. If no name is specified via this parameter, the store is persisted in the Apache Ignite with the same name defined in the table definition of the Siddhi application.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The name with which the Siddhi store must be persisted in the Apache Ignite store.</td>
         <td style="vertical-align: top">The table name defined in the Siddhi Application query.</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -65,22 +65,22 @@
     </tr>
     <tr>
         <td style="vertical-align: top">schema</td>
-        <td style="vertical-align: top; word-wrap: break-word">Schema name to access </td>
-        <td style="vertical-align: top">Public </td>
+        <td style="vertical-align: top; word-wrap: break-word">Schema name to access.Possible values for defining schema are public,ignite and any custom schema defined by user. </td>
+        <td style="vertical-align: top">Public</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
         <td style="vertical-align: top">template</td>
-        <td style="vertical-align: top; word-wrap: break-word"> name of a cache template registered in Ignite to use as a configuration for the distributed cache </td>
+        <td style="vertical-align: top; word-wrap: break-word"> name of a cache template registered in Ignite to use as a configuration for the distributed cache.The possible values are partitioned and replicated. </td>
         <td style="vertical-align: top">partitioned </td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">distributejoins</td>
+        <td style="vertical-align: top">distribute.joins</td>
         <td style="vertical-align: top; word-wrap: break-word">Whether to use distributed joins for non collocated data or not. </td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">STRING</td>
@@ -88,7 +88,7 @@
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">enforcejoinorder</td>
+        <td style="vertical-align: top">enforce.join.order</td>
         <td style="vertical-align: top; word-wrap: break-word">Whether to enforce join order of tables in the query or not. If set to true query optimizer will not reorder tables in join. </td>
         <td style="vertical-align: top">false </td>
         <td style="vertical-align: top">STRING</td>
@@ -98,15 +98,15 @@
     <tr>
         <td style="vertical-align: top">collocated</td>
         <td style="vertical-align: top; word-wrap: break-word">Whether your data is co-located or not </td>
-        <td style="vertical-align: top">false </td>
+        <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">replicatedonly</td>
+        <td style="vertical-align: top">replicated.only</td>
         <td style="vertical-align: top; word-wrap: break-word">Whether query contains only replicated tables or not </td>
-        <td style="vertical-align: top">false </td>
+        <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -137,7 +137,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">backups</td>
-        <td style="vertical-align: top; word-wrap: break-word">Number of backup copies of data.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Number of backup copies of data.It can take the value of any positive integer</td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -145,7 +145,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">atomicity</td>
-        <td style="vertical-align: top; word-wrap: break-word">Sets atomicity mode for the cache. </td>
+        <td style="vertical-align: top; word-wrap: break-word">Sets atomicity mode for the cache.The possible values for atomicity are atomic,transactional and transactional_snapshot. </td>
         <td style="vertical-align: top">atomic </td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -161,8 +161,8 @@
     </tr>
     <tr>
         <td style="vertical-align: top">cache.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">Name of the cache created. </td>
-        <td style="vertical-align: top"> custom name of the new cache. </td>
+        <td style="vertical-align: top; word-wrap: break-word">Name of the cache created.It can take any custom name defined by user and default cache name takes the format {schema}_SQL_{table.name}</td>
+        <td style="vertical-align: top"> default name of the new cache. </td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>

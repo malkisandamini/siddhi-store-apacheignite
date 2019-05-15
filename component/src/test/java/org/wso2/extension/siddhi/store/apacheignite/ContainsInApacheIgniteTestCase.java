@@ -40,9 +40,9 @@ import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteTestUtils
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteTestUtils.URL;
 import static org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteTestUtils.USERNAME;
 
-public class ContainsIn {
+public class ContainsInApacheIgniteTestCase {
 
-    private static final Log log = LogFactory.getLog(UpdateFromApacheIgniteTestCase.class);
+    private static final Log log = LogFactory.getLog(ContainsInApacheIgniteTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int inEventCount;
     private int waitTime = 500;

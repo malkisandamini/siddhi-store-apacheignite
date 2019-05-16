@@ -1,17 +1,17 @@
-﻿siddhi-store-apacheignite
+﻿siddhi-store-ignite
 ======================================
 
 
-The **siddhi-store-apacheignite extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that  can be used to persist events to an RDBMS instance of the user's choice.
+The **siddhi-store-ignite extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that  can be used to persist events to an Apache Ignite instance of the user's choice.
 Find some useful links below:
 
-* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite">Source code</a>
-* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/releases">Releases</a>
-* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/issues">Issue tracker</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-ignite">Source code</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-ignite/releases">Releases</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-ignite/issues">Issue tracker</a>
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-apacheignite/api/5.0.0">5.0.0</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-ignite/api/1.0.0-SNAPSHOT">1.0.0-SNAPSHOT</a>.
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 * You can use this extension in the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support.
 
-* This extension is shipped by default with WSO2 Stream Processor, if you wish to use an alternative version of this extension you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/releases">jar</a> that can be found in the `<STREAM_PROCESSOR_HOME>/lib` directory.
+* This extension is shipped by default with WSO2 Stream Processor, if you wish to use an alternative version of this extension you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-ignite/releases">jar</a> that can be found in the `<STREAM_PROCESSOR_HOME>/lib` directory.
 
 **Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a>**
 
@@ -35,7 +35,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 ```
      <dependency>
         <groupId>org.wso2.extension.siddhi.store.</groupId>
-        <artifactId>siddhi-store-</artifactId>
+        <artifactId>siddhi-store-ignite</artifactId>
         <version>x.x.x</version>
      </dependency>
 ```
@@ -43,9 +43,9 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 ## How to Contribute
  
-  * Please report issues at <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/issues">GitHub Issue Tracker</a>.
+  * Please report issues at <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-ignite/issues">GitHub Issue Tracker</a>.
   
-  * Send your contributions as pull requests to <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-apacheignite/tree/master">master branch</a>. 
+  * Send your contributions as pull requests to <a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-ignite/tree/master">master branch</a>. 
  
 ## Contact us 
 

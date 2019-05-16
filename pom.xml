@@ -24,8 +24,8 @@
         <artifactId>wso2</artifactId>
         <version>5</version>
     </parent>
-    <groupId>org.wso2.extension.siddhi.store.apacheignite</groupId>
-    <artifactId>siddhi-store-apacheignite-parent</artifactId>
+    <groupId>org.wso2.extension.siddhi.store.ignite</groupId>
+    <artifactId>siddhi-store-ignite-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <name>WSO2 Siddhi Extension - apacheIgnite Store</name>
     <modelVersion>4.0.0</modelVersion>
@@ -40,26 +40,26 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
-        <profile>
-            <id>documentation-deploy</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.wso2.siddhi</groupId>
-                        <artifactId>siddhi-doc-gen</artifactId>
-                        <version>${siddhi.version}</version>
-                        <executions>
-                            <execution>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>deploy-mkdocs-github-pages</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!--<profile>-->
+            <!--<id>documentation-deploy</id>-->
+            <!--<build>-->
+                <!--<plugins>-->
+                    <!--<plugin>-->
+                        <!--<groupId>org.wso2.siddhi</groupId>-->
+                        <!--<artifactId>siddhi-doc-gen</artifactId>-->
+                        <!--<version>${siddhi.version}</version>-->
+                        <!--<executions>-->
+                            <!--<execution>-->
+                                <!--<phase>compile</phase>-->
+                                <!--<goals>-->
+                                    <!--<goal>deploy-mkdocs-github-pages</goal>-->
+                                <!--</goals>-->
+                            <!--</execution>-->
+                        <!--</executions>-->
+                    <!--</plugin>-->
+                <!--</plugins>-->
+            <!--</build>-->
+        <!--</profile>-->
     </profiles>
     <properties>
         <siddhi.version>4.4.9</siddhi.version>

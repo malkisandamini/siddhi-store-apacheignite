@@ -21,13 +21,12 @@
     <!-- SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING : SQL statement will different for each event -->
     <!-- NP_LOAD_OF_KNOWN_NULL_VALUE: Null is checked at the connection clean up util class-->
     <Match>
-        <Class name="org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteStore"/>
+        <Class name="org.wso2.extension.siddhi.store.ignite.ApacheIgniteStore"/>
         <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING, NP_LOAD_OF_KNOWN_NULL_VALUE, IS2_INCONSISTENT_SYNC"/>
     </Match>
 
-
     <Match>
-        <Class name="org.wso2.extension.siddhi.store.apacheignite.ApacheIgniteIterator"/>
+        <Class name="org.wso2.extension.siddhi.store.ignite.ApacheIgniteIterator"/>
         <Bug pattern="IT_NO_SUCH_ELEMENT"/>
     </Match>
 </FindBugsFilter>

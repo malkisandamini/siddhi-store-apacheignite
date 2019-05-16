@@ -20,13 +20,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.extension.siddhi.store.apacheignite</groupId>
-        <artifactId>siddhi-store-apacheignite-parent</artifactId>
+        <groupId>org.wso2.extension.siddhi.store.ignite</groupId>
+        <artifactId>siddhi-store-ignite-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>siddhi-store-apacheignite</artifactId>
+    <artifactId>siddhi-store-ignite</artifactId>
     <packaging>bundle</packaging>
     <name>Siddhi Extension - apacheIgnite Store Implementation</name>
     <dependencies>
@@ -61,6 +61,28 @@
             <artifactId>commons-logging</artifactId>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>documentation-deploy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.wso2.siddhi</groupId>
+                        <artifactId>siddhi-doc-gen</artifactId>
+                        <version>${siddhi.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>deploy-mkdocs-github-pages</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>
@@ -124,7 +146,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.extension.siddhi.store.apacheignite.*,
+                            org.wso2.extension.siddhi.store.ignite.ignite.*,
                         </Export-Package>
                         <Import-Package>
                             org.apache.commons.logging.*;version="${commons.logging.version.range}",

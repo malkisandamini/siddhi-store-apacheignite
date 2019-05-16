@@ -19,16 +19,16 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="Siddhi-Store-ApacheIgnite-Test-Suite" parallel="false">
-    <test name="Siddhi-store-apacheignite-tests" preserve-order="true" parallel="false">
+    <test name="Siddhi-store-ignite-tests" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.DeleteFromApacheIgniteTestCase"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.InsertIntoApacheIgniteTable"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.ContainsInApacheIgniteTestCase"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.DefineTableTestCase"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.UpdateFromApacheIgniteTestCase"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.UpdateorInsertIntoApacheIgnite"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.ReadEventsFromApacheIgniteTestCase"/>
-            <class name="org.wso2.extension.siddhi.store.apacheignite.StoreQueryTestCase"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.DeleteFromApacheIgniteTestCase"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.InsertIntoApacheIgniteTable"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.ContainsInApacheIgniteTestCase"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.DefineTableTestCase"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.UpdateFromApacheIgniteTestCase"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.UpdateorInsertIntoApacheIgnite"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.ReadEventsFromApacheIgniteTestCase"/>
+            <class name="org.wso2.extension.siddhi.store.ignite.StoreQueryTestCase"/>
         </classes>
     </test>
 </suite>

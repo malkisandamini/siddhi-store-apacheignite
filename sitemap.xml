@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+     <loc>https://wso2-extensions.github.io/siddhi-store-ignite/</loc>
+     <lastmod>2019-05-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://wso2-extensions.github.io/siddhi-store-ignite/api/latest/</loc>
+     <lastmod>2019-05-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc></loc>
+     
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://wso2-extensions.github.io/siddhi-store-ignite/license/</loc>
+     <lastmod>2019-05-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+</urlset>
